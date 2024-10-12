@@ -12,7 +12,6 @@ import useModal from '@shared/hooks/useModal';
 import TruncatedAddress from '@shared/components/TruncatedAddress';
 import AppModal from '@components/ui/AppModal';
 import LoginForm from '@shared/components/LoginForm';
-import { useWallet } from '@solana/wallet-adapter-react';
 import {
   IChatTab,
   IDateTab,
@@ -23,6 +22,7 @@ import {
   ITimeTab,
 } from '../hooks/useProfile';
 import Switcher from './Switcher';
+import { useWallet } from '@solana/wallet-adapter-react';
 
 export interface IHeaderProps {
   query: ITab | ITimeTab | IDateTab | IStratTab | IChatTab | IPerfTab;
