@@ -43,8 +43,12 @@ interface IBotsProps {
   handleOpenWalletModal: () => void;
 }
 
+const truncateDecimals = (value: number, decimalPlaces: number = 2): number => {
+  const multiplier = 10 ** decimalPlaces;
+  return Math.trunc(value * multiplier) / multiplier;
+};
+
 const Bots: React.FC<IBotsProps> = ({
-  botsData,
   timeTabs,
   stratTabs,
   tradeDateTabs,
@@ -63,9 +67,8 @@ const Bots: React.FC<IBotsProps> = ({
   cardBotData,
   searchParams,
   setSearchParams,
-  handleOpenWalletModal,
 }) => {
-  const { deposit, withdraw } = useTransaction();
+  const { withdraw } = useTransaction();
   const headers = [
     'BOT',
     'STATUS',
@@ -77,6 +80,8 @@ const Bots: React.FC<IBotsProps> = ({
     '',
   ];
   const [selectedBot, setSelectedBot] = useState<IBotData | null>(null);
+
+  const botsData = useAppSelector((state) => state.auth.botsData);
 
   const handleBotClick = (bot: IBotData | undefined) => {
     if (!bot) return;
@@ -112,24 +117,9 @@ const Bots: React.FC<IBotsProps> = ({
     );
   }
 
-  const navigateToTraining = () => {
-    setSearchParams({ tab: 'training' });
-  };
-
-  const { address } = useAppSelector((state) => state.auth);
-  
-  const handleCreateNewBot = () => {
-    if (!address) {
-      setSearchParams({ redirectToTraining: 'true' });
-      handleOpenWalletModal();
-    } else {
-      navigateToTraining();
-    }
-  };
-
   return (
     <div>
-      <h2 className="text-2xl font-bold mb-4">Trading bots list</h2>
+      <h2 className="text-2xl font-bold mb-4 mt-6">Trading bot list</h2>
       <div className="flex justify-between items-center mb-4">
         <div className="flex space-x-4">
           {['Best', 'Worst', 'OTN', 'SOL', 'BTC', 'USDC'].map((tab) => (
@@ -148,24 +138,6 @@ const Bots: React.FC<IBotsProps> = ({
           />
         </div>
       </div>
-      <button
-        className="flex items-center text-blue-500 hover:text-blue-700 mb-4"
-        onClick={handleCreateNewBot}
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-5 w-5 mr-2"
-          viewBox="0 0 20 20"
-          fill="currentColor"
-        >
-          <path
-            fillRule="evenodd"
-            d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
-            clipRule="evenodd"
-          />
-        </svg>
-        Create New Bot
-      </button>
       <table className="w-full">
         <thead>
           <tr>
@@ -211,9 +183,7 @@ const Bots: React.FC<IBotsProps> = ({
                   />
                 </div>
               </td>
-              <td>
-                ${bot.portfolio.value} ({bot.portfolio.percentage}%)
-              </td>
+              <td>${bot.portfolio}</td>
               <td>{bot.accuracy}%</td>
               <td>{bot.sharpeRatio}</td>
               <td>{bot.apr}%</td>

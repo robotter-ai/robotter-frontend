@@ -44,6 +44,9 @@ const authSlice = createSlice({
     setBotData: (state, action: PayloadAction<IBotData[]>) => {
       state.botsData = action.payload;
     },
+    addBot: (state, action: PayloadAction<IBotData>) => {
+      state.botsData.unshift(action.payload);
+    },
     updateBotStats: (state, action: PayloadAction<Partial<IBotData>>) => {
       const index = state.botsData.findIndex(
         (bot) => bot.id === action.payload.id
@@ -65,6 +68,7 @@ export const {
   setLoginStatus,
   setUsdcBalance,
   setBotData,
+  addBot,
   updateBotStats,
   resetAuth,
 } = authSlice.actions;
