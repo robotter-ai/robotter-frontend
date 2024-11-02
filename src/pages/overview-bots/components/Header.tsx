@@ -1,18 +1,18 @@
-import React, { useEffect } from 'react';
+import TruncatedAddress from '@shared/components/TruncatedAddress';
 import { SetURLSearchParams, useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
 import {
   RobotterLogo,
   BellIcon,
   WalletIcon,
   HeadProfileIcon,
-  PhantomIcon,
 } from '@assets/icons';
 import { useAppSelector } from '@shared/hooks/useStore';
 import useModal from '@shared/hooks/useModal';
-import TruncatedAddress from '@shared/components/TruncatedAddress';
 import AppModal from '@components/ui/AppModal';
 import LoginForm from '@shared/components/LoginForm';
 import { useWallet } from '@solana/wallet-adapter-react';
+import SwitchWalletModal from './SwitchWalletModal';
 import {
   IChatTab,
   IDateTab,
@@ -39,6 +39,7 @@ const Header: React.FC<IHeaderProps> = ({
 }) => {
   const { address } = useAppSelector((state) => state.auth);
   const { isOpen, handleOpen, handleClose } = useModal();
+  const [showWallet, setShowWallet] = useState(false);
   const { wallet } = useWallet();
   const navigate = useNavigate();
 
@@ -70,6 +71,8 @@ const Header: React.FC<IHeaderProps> = ({
     }
   };
 
+  const toggleShowWallet = () => setShowWallet((prevState) => !prevState);
+
   return (
     <header className="flex items-center justify-between gap-x-4 w-full relative">
       <div className="flex items-center gap-x-4 w-full">
@@ -100,13 +103,24 @@ const Header: React.FC<IHeaderProps> = ({
           <HeadProfileIcon width="1.5rem" height="1.5rem" />
         </span>
         {address ? (
-          <span className="flex items-center justify-center gap-x-2 rounded-[33px] bg-blue-100 text-blue-400 text-sm font-normal w-[9.8125rem] h-[2.25rem]">
-            <TruncatedAddress address={address} />
-            {getWalletIcon()}
-          </span>
+          <div className="relative">
+            <span
+              className="flex items-center justify-center gap-x-2 rounded-[33px] bg-blue-100 cursor-pointer text-blue-400 text-sm font-normal w-[9.8125rem] h-[2.25rem] transition-colors duration-300 border border-transparent hover:border-blue-300/50"
+              onClick={toggleShowWallet}
+            >
+              <TruncatedAddress address={address} />
+              {getWalletIcon()}
+            </span>
+            {address && showWallet && (
+              <SwitchWalletModal
+                setShowWallet={setShowWallet}
+                phantomAddress={<TruncatedAddress address={address} />}
+              />
+            )}
+          </div>
         ) : (
           <span
-            className={`flex items-center justify-center gap-x-2 rounded-[33px] bg-blue-100 text-blue-400 hover:text-blue-300 border border-transparent text-sm font-normal w-[9.8125rem] h-[2.25rem] cursor-pointer ${
+            className={`flex items-center justify-center gap-x-2 rounded-[33px] bg-blue-100 text-blue-400 hover:text-blue-300 border border-transparent text-sm font-normal w-[9.8125rem] h-[2.25rem] ${
               address !== '' ? 'text-blue-300 border-blue-300' : ''
             }`}
             onClick={handleOpen}

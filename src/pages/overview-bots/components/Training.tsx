@@ -1,4 +1,13 @@
 import { strategiesConfigData as config } from '../../../utils/strategyConfigData';
+import { useGetHistoricalCandlesMutation } from '@store/market/api';
+import { defaultType } from '../../../utils/defaultType.util';
+import { transformData } from '../../../utils/transformData';
+import { updateDefaults } from '../../../utils/updateDefault';
+import { ArrowDown2Icon, ArrowUp2Icon } from '@assets/icons';
+import { SetURLSearchParams } from 'react-router-dom';
+import CustomBtn from '@components/ui/CustomBtn';
+import GroupedConfig from './GroupedConfig';
+import { FadeLoader } from 'react-spinners';
 import React, {
   ChangeEvent,
   useCallback,
@@ -6,10 +15,6 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { useGetHistoricalCandlesMutation } from '@store/market/api';
-import { SetURLSearchParams } from 'react-router-dom';
-import CustomBtn from '@components/ui/CustomBtn';
-import { FadeLoader } from 'react-spinners';
 import {
   ICardBotData,
   IResultStrat,
@@ -19,7 +24,6 @@ import {
 import Stepper from './Stepper';
 import Switcher from './Switcher';
 import CustomDropdown from './CustomDropdown';
-import RangeSlider from './RangeSlider';
 import CustomText from './CustomText';
 import CardBot from './CardBot';
 import Pagination from './Pagination';
@@ -28,9 +32,6 @@ import CustomDatePicker from './CustomDatePicker';
 import ButtonList from './ButtonList';
 import GoBack from './GoBack';
 import LineTab from './LineTab';
-import { transformData } from '../../../utils/transformData';
-import { formatText } from '../../../utils/formatText.util';
-import ToggleButton from './ToggleButton';
 
 export interface ITrainingProps {
   timeQuery: ITimeTab;
@@ -63,22 +64,29 @@ const Training: React.FC<ITrainingProps> = ({
     useGetHistoricalCandlesMutation();
   const [currentStep, setCurrentStep] = useState(1);
   const parentRef = useRef<HTMLDivElement | null>(null);
-  const [cfgName, setCfgName] = useState('pmmdynamiccontrollerconfig');
+  const [cfgName, setCfgName] = useState('supertrendconfig');
   const getReStatQuery = searchParams.get('resultStat') || 'result';
   const strategiesOpt = Object.keys(config).map((key) => ({
     label: key,
     value: key,
   }));
-  const valueArr = Object.keys(config[cfgName]).map((key) => {
+  const updateConfig = updateDefaults(config, cfgName);
+  const valueArr = Object.keys(updateConfig[cfgName]).map((key) => {
     const cfgD = config[cfgName][key].default;
     return [key, cfgD];
   });
+  const [advancedSettingsOpen, setAdancedSettingsOpen] = useState(false);
+
   const [value, setValue] = useState<ValueType>(Object.fromEntries(valueArr));
   const [tradePair, setTradePair] = useState('SOL/BNB');
   const [timeStamp, setTimeStamp] = useState({
     startTime: 1727771877,
     endTime: 1728376677,
   });
+
+  const uniqueGroups = Array.from(
+    new Set(Object.values(config[cfgName]).map((item) => item.group))
+  );
 
   const solData = [
     { name: 'SOL/USDC', isChecked: true },
@@ -87,18 +95,23 @@ const Training: React.FC<ITrainingProps> = ({
   ];
 
   const options = [
-    { label: 'Binance', value: '1' },
-    { label: 'Cube', value: '2' },
-    { label: 'XRP Ledger', value: '3' },
-    { label: 'Kujira', value: '4' },
-    { label: 'Polka DEX', value: '5' },
-    { label: 'Uniswap', value: '6' },
+    { label: 'Mango Markets', value: '1' },
+    { label: 'Binance', value: '2' },
+    { label: 'Cube', value: '3' },
+    { label: 'XRP Ledger', value: '4' },
+    { label: 'Kujira', value: '5' },
+    { label: 'Polka DEX', value: '6' },
+    { label: 'Uniswap', value: '7' },
   ];
+
+  const toggleAdancedSettingsOpen = () =>
+    setAdancedSettingsOpen((prevState) => !prevState);
 
   const handleSelect = (value: string) => {
     const valueArr = Object.keys(config[value]).map((key) => {
       const cfgd = config[value][key].default;
-      return [key, cfgd];
+      const cfgT = defaultType(config[value][key].type);
+      return [key, cfgd ? cfgd : cfgT];
     });
     setValue({ ...Object.fromEntries(valueArr), trading_pair: tradePair });
     setCfgName(value);
@@ -161,7 +174,7 @@ const Training: React.FC<ITrainingProps> = ({
   }, [tradePair, timeStamp]);
 
   return (
-    <div>
+    <div ref={parentRef}>
       <div
         id="training_header"
         className="flex flex-col md:flex-row gap-y-12 md:gap-y-3 justify-between items-center mt-8"
@@ -183,7 +196,6 @@ const Training: React.FC<ITrainingProps> = ({
           onClick={handleNextStep}
         />
       </div>
-
       <div className="flex items-center justify-between mt-8 mb-6 flex-wrap gap-y-4 md:gap-y-0">
         <h2 className="font-semibold text-2xl text-dark-300">
           {`Backtest ${
@@ -200,7 +212,6 @@ const Training: React.FC<ITrainingProps> = ({
           />
         </div>
       </div>
-
       <div
         id="main"
         className="flex flex-col lg:flex-row justify-between gap-y-8 lg:gap-y-0 lg:gap-x-4"
@@ -218,16 +229,11 @@ const Training: React.FC<ITrainingProps> = ({
               <div className="grid grid-cols-2 gap-x-5 gap-y-6 mb-6">
                 <div id="COL 1" className="col-span-2 md:col-auto">
                   <CustomText
-                    text="Select Strategy"
+                    text="Exchange"
                     toolTipWidth="w-[8rem]"
                     xtraStyle="mb-4 font-semibold text-xs uppercase"
                   />
-                  <CustomDropdown
-                    options={options}
-                    onSelect={() => {}}
-                    placeholder="Mango Market"
-                    disabled
-                  />
+                  <CustomDropdown options={options} onSelect={() => {}} />
                 </div>
                 <div id="COL 2" className="col-span-2 md:col-auto">
                   <CustomText
@@ -242,110 +248,29 @@ const Training: React.FC<ITrainingProps> = ({
                 </div>
               </div>
 
-              <div
-                ref={parentRef}
-                className="relative grid grid-cols-2 gap-x-5 gap-y-6 mb-8"
-              >
-                {Object.keys(config[cfgName]).map((key, idx) => {
-                  const cfg = config[cfgName][key];
-                  return (
-                    <div
-                      key={idx}
-                      id={`COL ${idx}`}
-                      className="col-span-2 md:col-auto mt-6"
-                    >
-                      <CustomText
-                        ref={parentRef}
-                        showOptText={!cfg.required}
-                        toolTipWidth="w-[8rem]"
-                        text={`${formatText(key)} ${
-                          cfg.name === 'stop_loss'
-                            ? ', -% from initial'
-                            : cfg.name === 'take_profit'
-                            ? ', +% from initial'
-                            : ''
-                        }`}
-                        xtraStyle="mb-4 font-semibold text-xs uppercase"
-                      />
-
-                      {cfg.display_type === 'dropdown' ||
-                      typeof cfg.default === 'object' ? (
-                        <CustomDropdown
-                          options={
-                            cfg.valid_values || cfg.default
-                              ? (
-                                  cfg.valid_values ||
-                                  (cfg.default as Array<number | string>)
-                                ).map((label, idx) => ({
-                                  label: `${label}`,
-                                  value: `${idx}`,
-                                }))
-                              : []
-                          }
-                          onSelect={() => {}}
-                        />
-                      ) : null}
-
-                      {cfg.display_type === 'input' ? (
-                        typeof cfg.default === 'number' ? (
-                          <div className="flex justify-between gap-x-4">
-                            <div className="flex items-center text-sm px-4 w-[6.1875rem] h-[2.25rem] rounded-[100px] bg-light-200 outline-2 outline outline-transparent border border-transparent text-blue-400 focus-within:outline-blue-300 focus-within:hover:border-transparent hover:border-blue-300/50 ">
-                              <span>{cfg.is_percentage ? '+' : ''}</span>
-                              <input
-                                name={key}
-                                className={`w-full ${
-                                  cfg.is_percentage ? 'text-center' : ''
-                                } bg-transparent disabled:cursor-not-allowed outline-none`}
-                                value={`${value[key]}`}
-                                onChange={handleOnInputChange}
-                              />
-                              <span>{cfg.is_percentage ? '%' : ''}</span>
-                            </div>
-
-                            <div className="w-60 flex-1 mt-[-5px]">
-                              <RangeSlider
-                                name={key}
-                                min={cfg.min_value || 0}
-                                max={cfg.max_value || 1000}
-                                step={cfg.type === 'int' ? 1 : 0.01}
-                                minLabel={`${cfg.min_value || '0'}${
-                                  cfg.is_percentage ? '%' : ''
-                                }`}
-                                maxLabel={`${cfg.max_value || '1000'}${
-                                  cfg.is_percentage ? '%' : ''
-                                }`}
-                                value={value[key] ? +value[key] : 0}
-                                onChange={handleOnRangeChange}
-                              />
-                            </div>
-                          </div>
-                        ) : typeof cfg.default === 'string' ||
-                          cfg.type === 'str' ? (
-                          <input
-                            className="bg-light-200 rounded-[22px] w-full h-[2.25rem] px-4 border text-sm border-transparent text-blue-400 focus:outline-blue-300 hover:border-blue-300/50 disabled:cursor-not-allowed"
-                            name={key}
-                            value={`${value[key]}`}
-                            disabled={key === 'trading_pair'}
-                          />
-                        ) : null
-                      ) : null}
-
-                      {cfg.display_type === 'toggle' && (
-                        <ToggleButton
-                          state={!!value[key] || false}
-                          toggleState={(isOn) => handleOnToggle(isOn, key)}
-                        />
-                      )}
-                    </div>
-                  );
-                })}
+              <div>
+                <GroupedConfig
+                  ref={parentRef}
+                  uniqueGroups={uniqueGroups}
+                  config={config}
+                  cfgName={cfgName}
+                  value={value}
+                  handleOnInputChange={handleOnInputChange}
+                  handleOnRangeChange={handleOnRangeChange}
+                  handleOnToggle={handleOnToggle}
+                />
+                <div
+                  className="flex gap-x-2 items-center cursor-pointer bg-light-300 px-4 w-full h-[1.9375rem] rounded-lg border border-light-400 text-xs font-normal text-navy transition-all duration-300 hover:border-navy mt-5 mb-8"
+                  onClick={toggleAdancedSettingsOpen}
+                >
+                  {advancedSettingsOpen ? (
+                    <ArrowUp2Icon width={10} height={5} />
+                  ) : (
+                    <ArrowDown2Icon width={10} height={5} />
+                  )}
+                  <span>Advanced settings</span>
+                </div>
               </div>
-
-              <CustomBtn
-                text="Select Optimal Strategy"
-                btnStyle="outline-primary"
-                xtraStyles="!max-w-[11.625rem] !h-[1.9375rem] w-full !text-xs"
-              />
             </div>
           ) : currentStep === 2 ? (
             <div>
@@ -402,7 +327,7 @@ const Training: React.FC<ITrainingProps> = ({
           ) : null}
         </div>
 
-        <div id="right" className="w-full">
+        <div ref={parentRef} id="right" className="w-full">
           <div className="h-[500px] relative">
             {isLoading ? (
               <div className="absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 inset-x-auto">
@@ -418,15 +343,47 @@ const Training: React.FC<ITrainingProps> = ({
 
           <div>
             <CustomText
-              text="Select timespan for the Backtest"
-              xtraStyle="mb-5 font-semibold text-xs uppercase"
+              text="timespan for the Backtest"
+              xtraStyle="mb-5 mt-7 font-semibold text-xs uppercase"
             />
             <div className="flex flex-col md:flex-row justify-between gap-y-4 md:gap-y-0 md:gap-x-4">
-              <CustomDatePicker getUnixTimeStamp={startTimeUnix} />
-              <CustomDatePicker getUnixTimeStamp={endTimeUnix} />
+              <CustomDatePicker
+                ref={parentRef}
+                getUnixTimeStamp={startTimeUnix}
+              />
+              <CustomDatePicker
+                ref={parentRef}
+                getUnixTimeStamp={endTimeUnix}
+              />
             </div>
           </div>
         </div>
+      </div>
+
+      <div>
+        {currentStep === 1 && (
+          <>
+            {advancedSettingsOpen && (
+              <GroupedConfig
+                ref={parentRef}
+                hasOtherGroup
+                uniqueGroups={uniqueGroups}
+                config={config}
+                cfgName={cfgName}
+                value={value}
+                handleOnInputChange={handleOnInputChange}
+                handleOnRangeChange={handleOnRangeChange}
+                handleOnToggle={handleOnToggle}
+              />
+            )}
+
+            <CustomBtn
+              text="Select Optimal Strategy"
+              btnStyle="outline-primary"
+              xtraStyles="!max-w-[11.625rem] !h-[1.9375rem] w-full !text-xs"
+            />
+          </>
+        )}
       </div>
 
       <div className="mt-[2.5rem]">

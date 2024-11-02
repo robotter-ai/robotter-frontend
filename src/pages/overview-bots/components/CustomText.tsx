@@ -40,7 +40,7 @@ const CustomText = forwardRef<HTMLDivElement, ICustomTextProps>(
         {text}
         {showOptText && <span className="text-light-400 text-xs uppercase">(Optional)</span>}
         {hasQuestionMark && (
-          <div className="relative">
+          <span className="relative">
             <span
               ref={spanRef}
               className="w-4 h-4 text-light-400 border border-light-400 rounded-full cursor-pointer text-xs flex items-center justify-center"
@@ -51,7 +51,7 @@ const CustomText = forwardRef<HTMLDivElement, ICustomTextProps>(
             {showToolTip && (
               <Tooltip ref={ref} text={toolTipText || text} width={toolTipWidth} />
             )}
-          </div>
+          </span>
         )}
       </p>
     );

@@ -8,24 +8,20 @@ interface IToolTipProps {
 const Tooltip = forwardRef<HTMLDivElement, IToolTipProps>(
   ({ text, width }, ref) => {
     const tooltipRef = useRef<HTMLDivElement | null>(null);
-    const [leftOffset, setLeftOffset] = useState(0);
-    const [isOverflow, setIsOverflow] = useState({ right: false, top: false });
+    const [isOverflow, setIsOverflow] = useState({
+      right: false,
+      left: false,
+      top: false,
+    });
 
     useEffect(() => {
       const adjustTooltipPosition = () => {
         const tooltip = tooltipRef.current;
-        const parent = (
-          ref as React.MutableRefObject<HTMLDivElement>
-        )?.current?.parentElement?.getElementsByClassName(
-          'scroll_container'
-        )[0];
+        const parent = (ref as React.MutableRefObject<HTMLDivElement>)?.current;
 
         if (tooltip && parent) {
           const tooltipRect = tooltip.getBoundingClientRect();
           const parentRect = parent.getBoundingClientRect();
-          let newLeftOffset = 0;
-
-          console.log('TOOL = ', tooltipRect, '\nPARENT = ', parentRect);
 
           // Check for top overflow
           if (tooltipRect.top < parentRect.top) {
@@ -35,16 +31,13 @@ const Tooltip = forwardRef<HTMLDivElement, IToolTipProps>(
 
           // Check for right overflow
           if (tooltipRect.right > parentRect.right) {
-            newLeftOffset = -(tooltipRect.right - parentRect.right + 10); // move left
             setIsOverflow((prevState) => ({ ...prevState, right: true }));
           }
 
           // Check for left overflow
           if (tooltipRect.left < parentRect.left) {
-            newLeftOffset = parentRect.left - tooltipRect.left + 10; // move right
+            setIsOverflow((prevState) => ({ ...prevState, left: true }));
           }
-
-          setLeftOffset(newLeftOffset);
         }
       };
 
@@ -55,9 +48,7 @@ const Tooltip = forwardRef<HTMLDivElement, IToolTipProps>(
       return () => {
         window.removeEventListener('resize', adjustTooltipPosition);
       };
-    }, [ref]);
-
-    console.log(isOverflow);
+    }, [ref, tooltipRef.current]);
 
     return (
       <div
@@ -65,12 +56,12 @@ const Tooltip = forwardRef<HTMLDivElement, IToolTipProps>(
         style={isOverflow.right ? { right: -16.5 } : { left: -25 }}
         className={`absolute bottom-8 z-50 ${
           width ? width : 'w-56'
-        } p-4 text-xs text-white bg-dark-400 rounded-[20px] h-fit`}
+        } p-4 text-xs text-white bg-dark-400 rounded-[20px] h-fit normal-case`}
       >
         {text}
         <div
           className={`absolute bottom-[-8px] ${
-            isOverflow.right ? 'right-[12%]' : 'left-[30%]'
+            isOverflow.right ? 'right-3' : 'left-10'
           } transform -translate-x-1/2 w-2 h-2 border-l-8 border-r-8 ${
             isOverflow.top
               ? 'border-b-8 border-b-dark-400 top-[-8px]'

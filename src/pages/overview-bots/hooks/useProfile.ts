@@ -12,9 +12,10 @@ import {
 
 export type ITab = 'overview' | 'datasets' | 'training' | 'bots' | 'tutorial';
 export type ITimeTab = 'minute' | 'hour' | 'day' | 'week' | 'month';
+export type ICryptoTab = 'all' | 'big' | 'trade' | 'alpha' | 'moon';
 export type IDateTab = 'day' | 'week' | 'month' | 'time';
 export type IStratTab = 'strat' | 'hyper';
-export type IChatTab = 'trades' | 'pnl';
+export type IChatTab = 'trades' | 'pnl' | 'portfolio';
 export type IPerfTab = 'best' | 'worst';
 export type IResultStrat = 'result' | 'strategy';
 
@@ -23,6 +24,7 @@ export interface ITabs {
     | ITab
     | ITimeTab
     | IDateTab
+    | ICryptoTab
     | IStratTab
     | IChatTab
     | IPerfTab
@@ -111,13 +113,14 @@ export default () => {
 
   const query: ITab = (searchParams.get('tab') as ITab) || 'overview';
   const dateQuery = (searchParams.get('date') as IDateTab) || 'week';
+  const cryptoQuery = (searchParams.get('crypto') as ICryptoTab) || 'all';
   const tradeDateQuery = (searchParams.get('trade_date') as IDateTab) || 'day';
   const timeQuery = (searchParams.get('time') as ITimeTab) || 'day';
   const perfQuery = (searchParams.get('perf') as IPerfTab) || 'best';
   const stratQuery = (searchParams.get('strat') as IStratTab) || 'strat';
   const resultStatQuery =
     (searchParams.get('resultStat') as IResultStrat) || 'result';
-  const chartTypeQuery = (searchParams.get('chart') as IChatTab) || 'trades';
+  const chartTypeQuery = (searchParams.get('chart') as IChatTab) || 'pnl';
 
   const tabs: ITabs[] = [
     {
@@ -164,6 +167,14 @@ export default () => {
     { key: 'time', name: 'All time', icon: null },
   ];
 
+  const cryptoTabs: ITabs[] = [
+    { key: 'all', name: 'All', icon: null },
+    { key: 'big', name: 'Big Brain', icon: null },
+    { key: 'trade', name: 'Trade Genius', icon: null },
+    { key: 'alpha', name: 'Alpha Trader', icon: null },
+    { key: 'moon', name: 'Moon Space', icon: null },
+  ];
+
   const resultStratTabs: ITabs[] = [
     { key: 'result', name: 'Result', icon: null },
     { key: 'strategy', name: 'Strategy', icon: null },
@@ -198,6 +209,11 @@ export default () => {
     { key: 'trades', name: 'Trades', icon: null },
   ];
 
+  const chartTypeTabsB: ITabs[] = [
+    { key: 'pnl', name: 'P&L', icon: null },
+    { key: 'portfolio', name: 'Portfolio', icon: null },
+  ];
+
   const PAGE_TITLE: Record<ITab, string> = {
     overview: 'Overview',
     datasets: 'Datasets',
@@ -230,6 +246,14 @@ export default () => {
       value: null,
       isProfit: false,
       color: '#4AB6C4',
+    },
+    {
+      amount: 550,
+      tag: 'Moon Space',
+      percentage: 3,
+      value: null,
+      isProfit: false,
+      color: '#2788B2',
     },
   ];
 
@@ -271,8 +295,8 @@ export default () => {
         'Shows the net gain or loss from your trades over a selected time period, helping you track performance',
     },
     {
-      label: 'Traded volume',
-      value: '$36 367',
+      label: 'Unrealized P&L',
+      value: '-$469',
       chartData: [50, 60, 40, 49, 38, 34, 80, 76, 95, 100],
       progressValue: null,
       color: '#4CAF50',
@@ -280,8 +304,8 @@ export default () => {
         'Represents the total value of all assets traded by your bots during the selected period, providing insight into your trading activity.',
     },
     {
-      label: 'Total trades',
-      value: '250',
+      label: 'Max. drawdown',
+      value: '59.36%',
       chartData: [98, 40, 60, 38, 42, 46, 40, 90, 95, 50],
       progressValue: null,
       color: '#F44336',
@@ -289,8 +313,56 @@ export default () => {
         'The number of all executed buy and sell orders by your bots during the selected period, showing the overall trading activity.',
     },
     {
-      label: 'Total accuracy',
-      value: '53%',
+      label: 'APR',
+      value: '200%',
+      chartData: [50, 60, 40, 49, 38, 34, 80, 76, 95, 100],
+      progressValue: null,
+      color: '#4CAF50',
+      toolTipText:
+        'The projected annual return on your trading strategies, expressed as a percentage, based on current performance and compounding',
+    },
+    {
+      label: 'Sharpe ratio',
+      value: '2.52',
+      chartData: [50, 60, 40, 49, 38, 34, 80, 76, 95, 100],
+      progressValue: null,
+      color: '#4CAF50',
+      toolTipText:
+        'The percentage of successful trades made by your bots, indicating how often their predictions were correct.',
+    },
+  ];
+
+  const statsDataTrade: IStatsTableData[] = [
+    {
+      label: 'Traded volume',
+      value: '$36 367',
+      chartData: [50, 60, 40, 49, 38, 34, 80, 76, 95, 100],
+      progressValue: null,
+      color: '#4CAF50',
+      toolTipText:
+        'Shows the net gain or loss from your trades over a selected time period, helping you track performance',
+    },
+    {
+      label: 'Total trades',
+      value: '250',
+      chartData: [50, 60, 40, 49, 38, 34, 80, 76, 95, 100],
+      progressValue: null,
+      color: '#4CAF50',
+      toolTipText:
+        'Represents the total value of all assets traded by your bots during the selected period, providing insight into your trading activity.',
+    },
+    {
+      label: 'Successful',
+      value: '133',
+      chartData: [98, 40, 60, 38, 42, 46, 40, 90, 95, 50],
+      progressValue: null,
+      color: '#F44336',
+      toolTipText:
+        'The number of all executed buy and sell orders by your bots during the selected period, showing the overall trading activity.',
+    },
+    {
+      label: 'Failed',
+      value: '117',
       chartData: [50, 60, 40, 49, 38, 34, 80, 76, 95, 100],
       progressValue: null,
       color: '#4CAF50',
@@ -298,8 +370,8 @@ export default () => {
         'The percentage of successful trades made by your bots, indicating how often their predictions were correct.',
     },
     {
-      label: 'APR',
-      value: '200%',
+      label: 'Total accuracy',
+      value: '53%',
       chartData: [50, 60, 40, 49, 38, 34, 80, 76, 95, 100],
       progressValue: null,
       color: '#4CAF50',
@@ -370,7 +442,7 @@ export default () => {
         "The amount of OTN (Robotter's native token) you hold. Staking OTN can reduce your trading fees and unlock additional rewards for increased profitability.",
     },
     {
-      label: 'Monthly compute costs',
+      label: 'Compute costs',
       value: '$150',
       chartData: [98, 40, 60, 38, 42, 46, 40, 90, 95, 50],
       progressValue: null,
@@ -563,6 +635,50 @@ export default () => {
           labelB: [89, 'OTN'],
           percentage: 4,
           isProfit: true,
+        },
+      ],
+    },
+    {
+      name: 'Moon Space',
+      rate: 62,
+      isPositive: false,
+      pieChartData: [
+        {
+          amount: 49,
+          tag: 'profit',
+          percentage: 49,
+          color: '#218358',
+          isProfit: true,
+          value: null,
+        },
+        {
+          amount: 51,
+          tag: 'loss',
+          percentage: 51,
+          color: '#CE2C31',
+          isProfit: true,
+          value: null,
+        },
+      ],
+      lineChartData: [90, 85, 80, 70, 60, 65, 75, 76, 95, 80],
+      tableData: [
+        {
+          labelA: [102, 'APR'],
+          labelB: [0.0003, 'ETH'],
+          percentage: 2,
+          isProfit: true,
+        },
+        {
+          labelA: [2.43, 'Sharpe ratio'],
+          labelB: [161, 'JUP'],
+          percentage: 7,
+          isProfit: false,
+        },
+        {
+          labelA: [6, 'Trades'],
+          labelB: [258, 'DRIFT'],
+          percentage: 5,
+          isProfit: false,
         },
       ],
     },
@@ -861,13 +977,16 @@ export default () => {
     tabs,
     dateTabs,
     timeTabs,
+    cryptoTabs,
     perfTabs,
     stratTabs,
     tradeDateTabs,
     resultStratTabs,
     chartTypeTabs,
+    chartTypeTabsB,
     statsData,
     statsDataOTN,
+    statsDataTrade,
     statsDataSOL,
     statsDataLock,
     cryptoStats,
@@ -884,6 +1003,7 @@ export default () => {
     dateQuery,
     timeQuery,
     perfQuery,
+    cryptoQuery,
     resultStatQuery,
     tradeDateQuery,
     stratQuery,

@@ -21,6 +21,7 @@ const CryptoStats: React.FC<ICryptoStatsProps> = ({
           <span className="w-4 h-4 rounded-full bg-chart-200" />
           <span>
             <h2 className="text-dark-300 font-normal text-base mb-1">$0</h2>
+            <h2 className="text-dark-100 font-normal text-xs">-</h2>
           </span>
           <div>
             <div className="flex justify-center items-center min-w-[3.8125rem] h-[1.4375rem] bg-states rounded-lg px-2 pt-[1px] gap-x-1">

@@ -16,13 +16,16 @@ const OverviewBots: React.FC = () => {
     timeTabs,
     perfTabs,
     stratTabs,
+    cryptoTabs,
     tradeDateTabs,
     resultStratTabs,
     chartTypeTabs,
+    chartTypeTabsB,
     cryptoStats,
     cryptoStatsBots,
     statsData,
     statsDataOTN,
+    statsDataTrade,
     statsDataSOL,
     statsDataLock,
     cardBotData,
@@ -32,6 +35,7 @@ const OverviewBots: React.FC = () => {
     timeQuery,
     perfQuery,
     stratQuery,
+    cryptoQuery,
     tradeDateQuery,
     resultStatQuery,
     bigStatTable,
@@ -68,11 +72,16 @@ const OverviewBots: React.FC = () => {
       <Overview
         dateTabs={dateTabs}
         dateQuery={dateQuery}
+        cryptoQuery={cryptoQuery}
+        chartTypeQuery={chartTypeQuery}
         timeQuery={timeQuery}
         perfQuery={perfQuery}
         timeTabs={timeTabs}
         perfTabs={perfTabs}
+        cryptoTabs={cryptoTabs}
+        chartTypeTabsB={chartTypeTabsB}
         statsData={statsData}
+        statsDataTrade={statsDataTrade}
         statsDataOTN={statsDataOTN}
         cryptoStats={cryptoStats}
         searchParams={searchParams}

@@ -28,7 +28,7 @@ const StatsTable: React.FC<IStatsTableProps> = ({
         id="title"
         className={`flex gap-x-4 items-center ${titleStyle || 'mb-3'}`}
       >
-        <h2 className="font-semibold text-xs text-dark-300  uppercase">
+        <h2 className="font-semibold text-xs text-dark-300 uppercase">
           {title}
         </h2>
         {showActive && (
@@ -42,11 +42,11 @@ const StatsTable: React.FC<IStatsTableProps> = ({
         {statsData.map((stat, index) => (
           <div
             key={index}
-            className={`grid grid-cols-2 py-1 h-[2.0625rem] border-b border-light-400 ${
+            className={`grid grid-cols-[auto_12rem] py-1 h-[2.0625rem] border-b border-light-400 ${
               index === 0 ? 'border-t' : ''
             }`}
           >
-            <div id="COL 1" className="flex items-center flex-1">
+            <div id="COL 1" className="flex items-center w-fit">
               <CustomText
                 text={stat.label}
                 hasQuestionMark={hasQuestionMark}
@@ -56,7 +56,7 @@ const StatsTable: React.FC<IStatsTableProps> = ({
 
             <div
               id="COL 2"
-              className="flex justify-between gap-x-1 items-center"
+              className="flex justify-between items-center"
             >
               <div>
                 {/* Chart */}

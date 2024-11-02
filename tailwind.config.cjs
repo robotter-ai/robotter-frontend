@@ -3,6 +3,9 @@ module.exports = {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
+      boxShadow: {
+        custom: '0px 16px 32px 0px #16253533',
+      },
       colors: {
         white: '#fff',
         primary: { DEFAULT: '#1DC3CF', strong: '#0192A7' },
@@ -18,6 +21,7 @@ module.exports = {
         'chart-100': '#4AB6C4',
         'chart-200': '#1F609C',
         'chart-300': '#3AA8F0',
+        'chart-400': '#2788B2',
         'green-100': '#218358',
         'red-100': '#CE2C31',
         'light-20': '#F6F8FB',
@@ -35,6 +39,7 @@ module.exports = {
         'text-dark': '#244141',
         'form-bg': '#F6FAFB',
         states: '#EFB621',
+        turkish: '#80FFED',
       },
     },
   },
