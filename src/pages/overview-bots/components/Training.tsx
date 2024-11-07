@@ -5,9 +5,15 @@ import { transformData } from '../../../utils/transformData';
 import { updateDefaults } from '../../../utils/updateDefault';
 import { ArrowDown2Icon, ArrowUp2Icon } from '@assets/icons';
 import { SetURLSearchParams } from 'react-router-dom';
+import CandlestickChart from './CandlestickChart';
+import CustomDatePicker from './CustomDatePicker';
 import CustomBtn from '@components/ui/CustomBtn';
+import CustomDropdown from './CustomDropdown';
 import GroupedConfig from './GroupedConfig';
 import { FadeLoader } from 'react-spinners';
+import ButtonList from './ButtonList';
+import CustomText from './CustomText';
+import Pagination from './Pagination';
 import React, {
   ChangeEvent,
   useCallback,
@@ -23,13 +29,7 @@ import {
 } from '../hooks/useProfile';
 import Stepper from './Stepper';
 import Switcher from './Switcher';
-import CustomDropdown from './CustomDropdown';
-import CustomText from './CustomText';
 import CardBot from './CardBot';
-import Pagination from './Pagination';
-import CandlestickChart from './CandlestickChart';
-import CustomDatePicker from './CustomDatePicker';
-import ButtonList from './ButtonList';
 import GoBack from './GoBack';
 import LineTab from './LineTab';
 
@@ -76,7 +76,6 @@ const Training: React.FC<ITrainingProps> = ({
     return [key, cfgD];
   });
   const [advancedSettingsOpen, setAdancedSettingsOpen] = useState(false);
-
   const [value, setValue] = useState<ValueType>(Object.fromEntries(valueArr));
   const [tradePair, setTradePair] = useState('SOL/BNB');
   const [timeStamp, setTimeStamp] = useState({
@@ -233,7 +232,11 @@ const Training: React.FC<ITrainingProps> = ({
                     toolTipWidth="w-[8rem]"
                     xtraStyle="mb-4 font-semibold text-xs uppercase"
                   />
-                  <CustomDropdown options={options} onSelect={() => {}} />
+                  <CustomDropdown
+                    showTooTip
+                    options={options}
+                    onSelect={() => {}}
+                  />
                 </div>
                 <div id="COL 2" className="col-span-2 md:col-auto">
                   <CustomText

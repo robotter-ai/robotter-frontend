@@ -1,23 +1,26 @@
-import { ArrowDown2Icon, ArrowUp2Icon } from '@assets/icons';
+import { ArrowDown2Icon, ArrowUp2Icon, PointerIcon } from '@assets/icons';
 import React, { useEffect, useRef, useState } from 'react';
+import ReactDOM from 'react-dom';
 
 interface Option {
   label: string;
   value: string;
 }
 
-interface CustomDropdownProps {
+interface ICustomDropdownProps {
   options: Option[];
   onSelect: (value: string) => void;
   placeholder?: string;
   disabled?: boolean;
+  showTooTip?: boolean;
 }
 
-const CustomDropdown: React.FC<CustomDropdownProps> = ({
+const CustomDropdown: React.FC<ICustomDropdownProps> = ({
   options,
   onSelect,
   placeholder,
   disabled,
+  showTooTip,
 }) => {
   const dropDownRef = useRef<HTMLDivElement>(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -25,13 +28,27 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
   const [selectedValue, setSelectedValue] = useState<string>(
     placeholder || (options.length > 0 ? options[0].label : 'Select Option')
   );
-  const lastIdx = options.length - 1;
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [tooltipPos, setTooltipPos] = useState<{
+    top: number;
+    left: number;
+  } | null>(null);
 
   const handleOptionClick = (option: Option) => {
     setSelectedValue(option.label);
     setIsOpen(false);
     setIsSelected(true);
     onSelect(option.value);
+    setTooltipPos(null);
+  };
+
+  const handleMouseEnter = (event: React.MouseEvent, idx: number) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    setTooltipPos({
+      top: rect.top + window.scrollY + rect.height / 2,
+      left: rect.right + 10,
+    });
+    setHoveredIndex(idx);
   };
 
   useEffect(() => {
@@ -70,16 +87,37 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
           {options.map((option, idx) => (
             <div
               key={option.value}
-              className={`text-sm p-2 font-normal border-b border-chart-200 hover:bg-light-200 hover:text-chart-200 cursor-pointer ${
-                lastIdx === idx ? 'border-none' : ''
+              className={`relative text-sm p-2 font-normal border-b border-chart-200 hover:bg-chart-200 cursor-pointer ${
+                idx === options.length - 1 ? 'border-none' : ''
               }`}
               onClick={() => handleOptionClick(option)}
+              onMouseEnter={(e) => handleMouseEnter(e, idx)}
+              onMouseLeave={() => setHoveredIndex(null)}
             >
               {option.label}
             </div>
           ))}
         </div>
       )}
+
+      {hoveredIndex !== null &&
+        tooltipPos &&
+        showTooTip &&
+        ReactDOM.createPortal(
+          <div
+            className="absolute p-4 rounded-[20px] text-white bg-chart-200 ml-10 text-sm max-w-[15rem]"
+            style={{
+              top: tooltipPos.top,
+              left: tooltipPos.left,
+              transform: 'translateY(-50%)',
+            }}
+          >
+            The strategy makes money. A lot of money. Very much money. Too much
+            money.
+            <PointerIcon className="absolute left-[-5px] -translate-y-1/2 top-1/2" />
+          </div>,
+          document.body
+        )}
     </div>
   );
 };

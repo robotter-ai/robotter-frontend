@@ -45,6 +45,7 @@ import { ReactComponent as ArrowLeftIcon } from '@assets/icons/arrow-left.svg';
 import { ReactComponent as ArrowRightIcon } from '@assets/icons/arrow-right.svg';
 import { ReactComponent as CalendarIcon } from '@assets/icons/Calendar.svg';
 import { ReactComponent as MetaMaskIcon } from '@assets/icons/Metamask.svg';
+import { ReactComponent as PointerIcon } from '@assets/icons/pointer.svg';
 
 export {
   AlarmClockIcon,
@@ -93,5 +94,6 @@ export {
   ArrowLeftIcon,
   ArrowRightIcon,
   CalendarIcon,
-  MetaMaskIcon
+  MetaMaskIcon,
+  PointerIcon,
 };

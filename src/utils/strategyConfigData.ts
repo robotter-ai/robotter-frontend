@@ -129,7 +129,7 @@ export const strategiesConfigData: IStrategiesConfigData = {
       is_advanced: false,
       type: 'CandlesConfig',
       prompt: '',
-      default: [1, 2, 3],
+      default: [],
       required: true,
       min_value: null,
       max_value: null,
