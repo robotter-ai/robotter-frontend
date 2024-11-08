@@ -233,7 +233,6 @@ const Training: React.FC<ITrainingProps> = ({
                     xtraStyle="mb-4 font-semibold text-xs uppercase"
                   />
                   <CustomDropdown
-                    showTooTip
                     options={options}
                     onSelect={() => {}}
                   />
@@ -246,6 +245,7 @@ const Training: React.FC<ITrainingProps> = ({
                   />
                   <CustomDropdown
                     options={strategiesOpt}
+                    showTooTip
                     onSelect={handleSelect}
                   />
                 </div>
