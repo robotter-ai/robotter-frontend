@@ -3,7 +3,7 @@ import { useGetHistoricalCandlesMutation } from '@store/market/api';
 import { defaultType } from '../../../utils/defaultType.util';
 import { transformData } from '../../../utils/transformData';
 import { updateDefaults } from '../../../utils/updateDefault';
-import { ArrowDown2Icon, ArrowUp2Icon } from '@assets/icons';
+import { ArrowDown2Icon, ArrowUp2Icon, LinkIcon } from '@assets/icons';
 import { SetURLSearchParams } from 'react-router-dom';
 import CandlestickChart from './CandlestickChart';
 import CustomDatePicker from './CustomDatePicker';
@@ -16,6 +16,7 @@ import CustomText from './CustomText';
 import Pagination from './Pagination';
 import React, {
   ChangeEvent,
+  Fragment,
   useCallback,
   useEffect,
   useRef,
@@ -136,7 +137,7 @@ const Training: React.FC<ITrainingProps> = ({
   };
 
   const handleNextStep = () => {
-    if (currentStep === 2) return;
+    if (currentStep === 4) return;
     setCurrentStep((prevState) => prevState + 1);
   };
 
@@ -174,56 +175,73 @@ const Training: React.FC<ITrainingProps> = ({
 
   return (
     <div ref={parentRef}>
+      <p className="text-dark-100 text-[0.625rem] text-left mt-8 ml-1">
+        Training / SOL Big Brain / Backtest
+      </p>
       <div
         id="training_header"
-        className="flex flex-col md:flex-row gap-y-12 md:gap-y-3 justify-between items-center mt-8"
+        className={`flex flex-col md:flex-row gap-y-12 md:gap-y-3 justify-between items-center ${
+          currentStep >= 3 ? 'mt-[0.55rem]' : 'mt-[-3px]'
+        }`}
       >
         <div className="flex flex-col md:flex-row gap-y-4 lg:gap-y-0 md:gap-x-3 w-full">
           <GoBack onClick={handlePrevStep} />
           <Stepper currentStep={currentStep} />
         </div>
 
-        <CustomBtn
-          text={`${
-            currentStep === 1
-              ? 'Run Backtest'
-              : currentStep === 2
-              ? 'Connect to Exchange'
-              : ''
-          }`}
-          xtraStyles="!max-w-[20.3125rem] md:w-[30%]"
-          onClick={handleNextStep}
-        />
-      </div>
-      <div className="flex items-center justify-between mt-8 mb-6 flex-wrap gap-y-4 md:gap-y-0">
-        <h2 className="font-semibold text-2xl text-dark-300">
-          {`Backtest ${
-            currentStep === 1 ? 'strategy' : currentStep === 2 ? 'results' : ''
-          }`}
-        </h2>
-        <div className="max-w-[20.25rem] w-[80%] h-[1.9375rem]">
-          <Switcher
-            keyQuery="time"
-            query={timeQuery}
-            tabs={timeTabs}
-            searchParams={searchParams}
-            setSearchParams={setSearchParams}
+        {currentStep == 1 || currentStep == 2 ? (
+          <CustomBtn
+            text={`${
+              currentStep === 1
+                ? 'Run Backtest'
+                : currentStep === 2
+                ? 'Save Strategy'
+                : ''
+            }`}
+            xtraStyles="!max-w-[20.3125rem] md:w-[30%]"
+            onClick={handleNextStep}
           />
-        </div>
+        ) : null}
       </div>
+      {currentStep == 1 || currentStep == 2 ? (
+        <div className="flex items-center justify-between mt-8 mb-6 flex-wrap gap-y-4 md:gap-y-0">
+          <h2 className="font-semibold text-2xl text-dark-300">
+            {`Backtest ${
+              currentStep === 1
+                ? 'strategy'
+                : currentStep === 2
+                ? 'results'
+                : ''
+            }`}
+          </h2>
+          <div className="max-w-[20.25rem] w-[80%] h-[1.9375rem]">
+            <Switcher
+              keyQuery="time"
+              query={timeQuery}
+              tabs={timeTabs}
+              searchParams={searchParams}
+              setSearchParams={setSearchParams}
+            />
+          </div>
+        </div>
+      ) : null}
       <div
         id="main"
         className="flex flex-col lg:flex-row justify-between gap-y-8 lg:gap-y-0 lg:gap-x-4"
       >
         <div id="left" className="w-full">
-          <div>
-            <p className="uppercase text-xs font-semibold text-dark-200 mb-5">
-              Adjust settings for each trading pair separately
-            </p>
-            <ButtonList btnData={solData} getTradePair={getTradePair} />
-          </div>
+          {currentStep == 1 || currentStep == 2 ? (
+            <div>
+              <p className="uppercase text-xs font-semibold text-dark-200 mb-5">
+                {currentStep == 1
+                  ? 'Adjust settings for each trading pair separately'
+                  : 'Click on Trading Pair to view the Results of the backtest'}
+              </p>
+              <ButtonList btnData={solData} getTradePair={getTradePair} />
+            </div>
+          ) : null}
 
-          {currentStep === 1 ? (
+          {currentStep == 1 ? (
             <div id="sliders_n_dropdowns" className="mt-6">
               <div className="grid grid-cols-2 gap-x-5 gap-y-6 mb-6">
                 <div id="COL 1" className="col-span-2 md:col-auto">
@@ -232,10 +250,7 @@ const Training: React.FC<ITrainingProps> = ({
                     toolTipWidth="w-[8rem]"
                     xtraStyle="mb-4 font-semibold text-xs uppercase"
                   />
-                  <CustomDropdown
-                    options={options}
-                    onSelect={() => {}}
-                  />
+                  <CustomDropdown options={options} onSelect={() => {}} />
                 </div>
                 <div id="COL 2" className="col-span-2 md:col-auto">
                   <CustomText
@@ -275,7 +290,7 @@ const Training: React.FC<ITrainingProps> = ({
                 </div>
               </div>
             </div>
-          ) : currentStep === 2 ? (
+          ) : currentStep == 2 ? (
             <div>
               <LineTab
                 keyQuery="resultStat"
@@ -327,40 +342,168 @@ const Training: React.FC<ITrainingProps> = ({
                 xtraStyles="!max-w-[7.75rem] !h-[1.9375rem] w-full !text-xs mt-6"
               />
             </div>
+          ) : currentStep == 3 ? (
+            <div className="mt-14">
+              <h1 className="text-2xl font-semibold text-dark-300 mb-6">
+                Choose an exchange
+              </h1>
+
+              <div className="w-[20.3125rem] relative">
+                <CustomText
+                  text="Select Exchange"
+                  toolTipWidth="w-[8rem]"
+                  hasQuestionMark={false}
+                  xtraStyle="mb-4 font-semibold text-xs uppercase"
+                />
+                <CustomDropdown options={options} onSelect={() => {}} />
+                <div className="absolute bottom-0 right-[-3rem] flex justify-center items-center cursor-pointer w-[2.25rem] h-[2.25rem] rounded-full bg-blue-100 text-blue-400 transition-colors duration-300 hover:bg-blue-400 hover:text-blue-100">
+                  <LinkIcon />
+                </div>
+              </div>
+
+              <div className="w-[20.3125rem] mt-8">
+                <CustomText
+                  text="mango Account Address"
+                  toolTipWidth="w-[12rem]"
+                  showOptText
+                  toolTipText="Robotter need the Mango Markets account address to trade."
+                  xtraStyle="mb-4 font-semibold text-xs uppercase"
+                />
+                <input
+                  className="bg-light-200 rounded-[22px] w-full h-[2.25rem] px-4 border text-sm border-transparent text-blue-400 focus:outline-blue-300 hover:border-blue-300/50 disabled:cursor-not-allowed"
+                  name=""
+                  defaultValue={`5ikB...yDEG`}
+                />
+              </div>
+
+              <CustomBtn
+                text={`Connect to Exchange`}
+                xtraStyles="!max-w-[20.3125rem] md:w-[30%] !mt-12"
+                onClick={handleNextStep}
+              />
+            </div>
+          ) : currentStep == 4 ? (
+            <div className="mt-14 flex justify-between">
+              <div id="left">
+                <CustomText
+                  text="Top up your trading bot balance"
+                  toolTipWidth="w-[8rem]"
+                  xtraStyle="mb-7 font-semibold text-dark-300 !text-2xl"
+                />
+
+                <div className="w-[20.3125rem]">
+                  <CustomText
+                    text="How much would you like to top up?"
+                    toolTipWidth="w-[8rem]"
+                    hasQuestionMark={false}
+                    xtraStyle="mb-4 font-semibold text-xs uppercase"
+                  />
+                  <input
+                    className="bg-light-200 rounded-[22px] w-full h-[2.25rem] px-4 border text-sm border-transparent text-blue-400 focus:outline-blue-300 hover:border-blue-300/50 disabled:cursor-not-allowed"
+                    name=""
+                    defaultValue={`$ 1487`}
+                  />
+                </div>
+
+                <div className="w-[20.3125rem] mt-8">
+                  <CustomText
+                    text="End date of trading"
+                    toolTipWidth="w-[12rem]"
+                    hasQuestionMark={false}
+                    xtraStyle="mb-4 font-semibold text-xs uppercase"
+                  />
+                  <CustomDatePicker
+                    direction="right"
+                    getUnixTimeStamp={endTimeUnix}
+                  />
+                </div>
+
+                <CustomBtn
+                  text={`Top Up`}
+                  xtraStyles="!max-w-[20.3125rem] md:w-full !mt-12"
+                  onClick={handleNextStep}
+                />
+              </div>
+
+              <div
+                id="right"
+                className="w-[20.3125rem] bg-blue-100 rounded-[22px] p-6 h-fit"
+              >
+                <CustomText
+                  text="Monthly expenses"
+                  toolTipWidth="w-[8rem]"
+                  xtraStyle="mb-7 !font-bold !text-blue-400 !text-xl !mx-auto"
+                />
+
+                <div id="table" className="grid grid-cols-2 mb-5">
+                  {[
+                    { t: 'Trading expenses', a: 8 },
+                    { t: 'Solana fees', a: 5 },
+                  ].map(({ t, a }, i) => (
+                    <Fragment key={i}>
+                      <span
+                        className={`font-normal text-sm text-dark-200 text-left ${
+                          i == 0 ? 'border-t' : 'border-y'
+                        } p-[0.5rem] border-white`}
+                      >
+                        {t}
+                      </span>
+                      <span
+                        className={`font-normal text-sm text-dark-300 text-right ${
+                          i == 0 ? 'border-t' : 'border-y'
+                        } p-[0.5rem] border-white`}
+                      >
+                        ${a}
+                      </span>
+                    </Fragment>
+                  ))}
+                </div>
+
+                <p className="font-bold text-[2rem] text-center text-dark-300">
+                  $13
+                </p>
+                <p className="font-normal text-xs text-center text-dark-100">
+                  Total
+                </p>
+              </div>
+            </div>
           ) : null}
         </div>
 
-        <div ref={parentRef} id="right" className="w-full">
-          <div className="h-[500px] relative">
-            {isLoading ? (
-              <div className="absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 inset-x-auto">
-                <FadeLoader color="#65636D" />
-              </div>
-            ) : (
-              <CandlestickChart
-                height={500}
-                data={data ? transformData(data.data) : []}
-              />
-            )}
-          </div>
+        {/* Only show chat when on step 1 and 2 */}
+        {currentStep == 1 || currentStep == 2 ? (
+          <div ref={parentRef} id="right" className="w-full">
+            <div className="h-[500px] relative">
+              {isLoading ? (
+                <div className="absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 inset-x-auto">
+                  <FadeLoader color="#65636D" />
+                </div>
+              ) : (
+                <CandlestickChart
+                  height={500}
+                  data={data ? transformData(data.data) : []}
+                />
+              )}
+            </div>
 
-          <div>
-            <CustomText
-              text="timespan for the Backtest"
-              xtraStyle="mb-5 mt-7 font-semibold text-xs uppercase"
-            />
-            <div className="flex flex-col md:flex-row justify-between gap-y-4 md:gap-y-0 md:gap-x-4">
-              <CustomDatePicker
-                ref={parentRef}
-                getUnixTimeStamp={startTimeUnix}
+            <div>
+              <CustomText
+                text="timespan for the Backtest"
+                xtraStyle="mb-5 mt-7 font-semibold text-xs uppercase"
               />
-              <CustomDatePicker
-                ref={parentRef}
-                getUnixTimeStamp={endTimeUnix}
-              />
+              <div className="flex flex-col md:flex-row justify-between gap-y-4 md:gap-y-0 md:gap-x-4">
+                <CustomDatePicker
+                  ref={parentRef}
+                  getUnixTimeStamp={startTimeUnix}
+                />
+                <CustomDatePicker
+                  ref={parentRef}
+                  getUnixTimeStamp={endTimeUnix}
+                />
+              </div>
             </div>
           </div>
-        </div>
+        ) : null}
       </div>
 
       <div>
@@ -389,27 +532,31 @@ const Training: React.FC<ITrainingProps> = ({
         )}
       </div>
 
-      <div className="mt-[2.5rem]">
-        <h1 className="font-semibold text-2xl text-dark-300">
-          Previous backtests strategies with the model
-        </h1>
+      {currentStep == 1 || currentStep == 2 ? (
+        <>
+          <div className="mt-[2.5rem]">
+            <h1 className="font-semibold text-2xl text-dark-300">
+              Previous backtests strategies with the model
+            </h1>
 
-        {/* CardBot */}
-        <div className="mt-4 gap-x-5 justify-between overflow-x-auto flex lt:flex-col flex-row">
-          {cardBotData.map((item, idx) => (
-            <CardBot
-              isEmpty={false}
-              key={idx}
-              cardBotData={item}
-              xtraStyle="lt:flex-auto flex-none xl:flex-auto"
-            />
-          ))}
-        </div>
-      </div>
+            {/* CardBot */}
+            <div className="mt-4 gap-x-5 justify-between overflow-x-auto flex lt:flex-col flex-row">
+              {cardBotData.map((item, idx) => (
+                <CardBot
+                  isEmpty={false}
+                  key={idx}
+                  cardBotData={item}
+                  xtraStyle="lt:flex-auto flex-none xl:flex-auto"
+                />
+              ))}
+            </div>
+          </div>
 
-      <div className="md:w-[20rem] h-[1.9375rem] mx-auto">
-        <Pagination />
-      </div>
+          <div className="md:w-[20rem] h-[1.9375rem] mx-auto">
+            <Pagination />
+          </div>
+        </>
+      ) : null}
     </div>
   );
 };

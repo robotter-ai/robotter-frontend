@@ -1,19 +1,20 @@
-import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { useState, useEffect, useRef, forwardRef } from 'react';
+import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import { CalendarIcon } from '@assets/icons';
 import 'react-calendar/dist/Calendar.css';
 import '@assets/styles/datepicker.css';
 import Calendar from 'react-calendar';
-import { CalendarIcon } from '@assets/icons';
 
 type ValuePiece = Date | null;
 type Value = ValuePiece | [ValuePiece, ValuePiece];
 
 interface ICustomDatePickerProps {
   getUnixTimeStamp: (unixTimeStamp: number) => void;
+  direction?: 'right' | 'left' | 'bottom' | 'top';
 }
 
 const CustomDatePicker = forwardRef<HTMLDivElement, ICustomDatePickerProps>(
-  ({ getUnixTimeStamp }, ref) => {
+  ({ getUnixTimeStamp, direction = 'bottom' }, ref) => {
     const [value, setValue] = useState<Value>(new Date());
     const [isCalendarOpen, setIsCalendarOpen] = useState(false);
     const [activeMonth, setActiveMonth] = useState(new Date());
@@ -157,7 +158,9 @@ const CustomDatePicker = forwardRef<HTMLDivElement, ICustomDatePickerProps>(
                 ? { left: 0 }
                 : undefined
             }
-            className="absolute w-[28.125rem] h-[259px] z-10 mt-2 bg-blue-400 text-white rounded-[22px] flex overflow-hidden"
+            className={`absolute w-[28.125rem] h-[259px] z-10 mt-2 bg-blue-400 text-white rounded-[22px] flex overflow-hidden ${
+              direction === 'right' ? 'left-[22rem] top-[-2rem]' : ''
+            }`}
           >
             {/* Above section for months */}
             <div className="flex-1">
