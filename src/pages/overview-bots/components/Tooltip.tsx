@@ -1,3 +1,4 @@
+import { PointerBottomIcon } from '@assets/icons';
 import { forwardRef, useEffect, useRef, useState } from 'react';
 
 interface IToolTipProps {
@@ -59,14 +60,17 @@ const Tooltip = forwardRef<HTMLDivElement, IToolTipProps>(
         } p-4 text-xs text-white bg-dark-400 rounded-[20px] h-fit normal-case`}
       >
         {text}
-        <div
-          className={`absolute bottom-[-8px] ${
-            isOverflow.right ? 'right-3' : 'left-10'
-          } transform -translate-x-1/2 w-2 h-2 border-l-8 border-r-8 ${
+        {/* <div
+          className={`absolute bottom-[-8px]  transform -translate-x-1/2 w-2 h-2 border-l-8 border-r-8 ${
             isOverflow.top
               ? 'border-b-8 border-b-dark-400 top-[-8px]'
               : 'border-t-8 border-t-dark-400'
           } border-transparent `}
+        /> */}
+        <PointerBottomIcon
+          className={`absolute bottom-[-7px] ${
+            isOverflow.right ? 'right-3' : 'left-7'
+          }`}
         />
       </div>
     );

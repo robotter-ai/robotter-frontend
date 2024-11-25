@@ -147,8 +147,8 @@ const GroupedConfig = forwardRef<HTMLDivElement, IGroupedConfigProps>(
           .filter((item) =>
             hasOtherGroup ? excludeGroups(item) : item === 'Other'
           )
-          .map((group) => (
-            <div>
+          .map((group, i) => (
+            <div key={i}>
               {group !== 'Other' && (
                 <h2 className="w-fit font-semibold text-2xl text-dark-300">
                   {group}

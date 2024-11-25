@@ -1,4 +1,4 @@
-import React, { forwardRef, useState, useRef, useEffect } from 'react';
+import { forwardRef, useState, useRef, useEffect } from 'react';
 import Tooltip from './Tooltip';
 
 interface ICustomTextProps {
@@ -9,8 +9,6 @@ interface ICustomTextProps {
   xtraStyle?: string;
   toolTipWidth?: string;
 }
-
-type ToolTipType = { [key: string]: boolean };
 
 const CustomText = forwardRef<HTMLDivElement, ICustomTextProps>(
   ({ text, toolTipText, showOptText, hasQuestionMark = true, xtraStyle, toolTipWidth }, ref) => {
