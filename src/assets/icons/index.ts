@@ -48,7 +48,7 @@ import { ReactComponent as MetaMaskIcon } from '@assets/icons/Metamask.svg';
 import { ReactComponent as PointerIcon } from '@assets/icons/pointer.svg';
 import { ReactComponent as PointerBottomIcon } from '@assets/icons/pointer-bottom.svg';
 import { ReactComponent as LinkIcon } from '@assets/icons/link.svg';
-import { ReactComponent as BackPackLogo } from '@assets/icons/backpack.svg';
+import { ReactComponent as BackPackLogo } from '@assets/icons/Backpack.svg';
 import { ReactComponent as BONKLogo } from '@assets/icons/BONK.svg';
 import { ReactComponent as BTCLogo } from '@assets/icons/BTC.svg';
 import { ReactComponent as ETHLogo } from '@assets/icons/ETH.svg';
