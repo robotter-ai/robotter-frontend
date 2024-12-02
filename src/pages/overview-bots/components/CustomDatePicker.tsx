@@ -11,11 +11,12 @@ type Value = ValuePiece | [ValuePiece, ValuePiece];
 interface ICustomDatePickerProps {
   getUnixTimeStamp: (unixTimeStamp: number) => void;
   direction?: 'right' | 'left' | 'bottom' | 'top';
+  isEmpty?: boolean
 }
 
 const CustomDatePicker = forwardRef<HTMLDivElement, ICustomDatePickerProps>(
-  ({ getUnixTimeStamp, direction = 'bottom' }, ref) => {
-    const [value, setValue] = useState<Value>(new Date());
+  ({ getUnixTimeStamp, direction = 'bottom', isEmpty }, ref) => {
+    const [value, setValue] = useState<Value>(isEmpty ? null : new Date());
     const [isCalendarOpen, setIsCalendarOpen] = useState(false);
     const [activeMonth, setActiveMonth] = useState(new Date());
     const [visibleMonths, setVisibleMonths] = useState<string[]>([]);
@@ -136,10 +137,10 @@ const CustomDatePicker = forwardRef<HTMLDivElement, ICustomDatePickerProps>(
             isCalendarOpen ? 'outline-blue-300 hover:border-white' : ''
           }`}
         >
-          <span>
+          <span className={`${!value ? 'text-sm font-normal text-blue-200' : ''}`}>
             {value
               ? (value as Date).toLocaleDateString('en-CA')
-              : 'Select Date'}
+              : 'YYYY-MM-DD'}
           </span>
         </div>
 

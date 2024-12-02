@@ -1,9 +1,15 @@
 import { strategiesConfigData as config } from '../../../utils/strategyConfigData';
+import {
+  ArrowDown2Icon,
+  ArrowUp2Icon,
+  MangoLogo,
+  SolanaLogo,
+  USDCLogo,
+} from '@assets/icons';
 import { useGetHistoricalCandlesMutation } from '@store/market/api';
 import { defaultType } from '../../../utils/defaultType.util';
 import { transformData } from '../../../utils/transformData';
 import { updateDefaults } from '../../../utils/updateDefault';
-import { ArrowDown2Icon, ArrowUp2Icon, LinkIcon } from '@assets/icons';
 import { SetURLSearchParams } from 'react-router-dom';
 import CandlestickChart from './CandlestickChart';
 import CustomDatePicker from './CustomDatePicker';
@@ -24,6 +30,7 @@ import React, {
 } from 'react';
 import {
   ICardBotData,
+  IDepositInfo,
   IResultStrat,
   ITabs,
   ITimeTab,
@@ -33,6 +40,7 @@ import Switcher from './Switcher';
 import CardBot from './CardBot';
 import GoBack from './GoBack';
 import LineTab from './LineTab';
+import CustomInput from '@components/ui/CustomInput';
 
 export interface ITrainingProps {
   timeQuery: ITimeTab;
@@ -44,6 +52,7 @@ export interface ITrainingProps {
   resultStatQuery: IResultStrat;
   bigStatTable: string[][];
   bigResultTable: string[][];
+  depositInfo: IDepositInfo[];
 }
 
 interface ValueType {
@@ -60,6 +69,7 @@ const Training: React.FC<ITrainingProps> = ({
   searchParams,
   setSearchParams,
   cardBotData,
+  depositInfo,
 }) => {
   const [historicalCandlesData, { isLoading, data, error }] =
     useGetHistoricalCandlesMutation();
@@ -82,6 +92,11 @@ const Training: React.FC<ITrainingProps> = ({
   const [timeStamp, setTimeStamp] = useState({
     startTime: 1727771877,
     endTime: 1728376677,
+    endDate: 0,
+  });
+  const [coinValue, setCoinValue] = useState<{ [key: string]: string }>({
+    SOL: '',
+    USDC: '',
   });
 
   const uniqueGroups = Array.from(
@@ -132,12 +147,18 @@ const Training: React.FC<ITrainingProps> = ({
     setValue((prevState) => ({ ...prevState, [name]: value }));
   };
 
+  const handleOnCoinInputChange = (evt: ChangeEvent<HTMLInputElement>) => {
+    const { value, name } = evt.target;
+    if (!/^\d*$/.test(value)) return;
+    setCoinValue((prevState) => ({ ...prevState, [name]: value }));
+  };
+
   const handleOnToggle = (isOn: boolean, key: string) => {
     setValue((prevState) => ({ ...prevState, [key]: isOn }));
   };
 
   const handleNextStep = () => {
-    if (currentStep === 4) return;
+    if (currentStep === 3) return;
     setCurrentStep((prevState) => prevState + 1);
   };
 
@@ -152,6 +173,10 @@ const Training: React.FC<ITrainingProps> = ({
 
   const endTimeUnix = (unix: number) => {
     setTimeStamp((prevState) => ({ ...prevState, endTime: unix }));
+  };
+
+  const endDateUnix = (unix: number) => {
+    setTimeStamp((prevState) => ({ ...prevState, endDate: unix }));
   };
 
   const handleCandleData = useCallback(async () => {
@@ -173,6 +198,11 @@ const Training: React.FC<ITrainingProps> = ({
     handleCandleData();
   }, [tradePair, timeStamp]);
 
+  const disabled =
+    currentStep === 3 ?
+    Object.values(coinValue).some((num) => num === '' || +num <= 0) ||
+    timeStamp.endDate === 0 : false;
+
   return (
     <div ref={parentRef}>
       <p className="text-dark-100 text-[0.625rem] text-left mt-8 ml-1">
@@ -181,27 +211,26 @@ const Training: React.FC<ITrainingProps> = ({
       <div
         id="training_header"
         className={`flex flex-col md:flex-row gap-y-12 md:gap-y-3 justify-between items-center ${
-          currentStep >= 3 ? 'mt-[0.55rem]' : 'mt-[-3px]'
+          currentStep >= 4 ? 'mt-[0.55rem]' : 'mt-[-3px]'
         }`}
       >
         <div className="flex flex-col md:flex-row gap-y-4 lg:gap-y-0 md:gap-x-3 w-full">
-          <GoBack onClick={handlePrevStep} />
-          <Stepper currentStep={currentStep} />
+          <GoBack onClick={handlePrevStep} disabled={currentStep <= 1} />
+          <Stepper currentStep={currentStep} setCurrentStep={setCurrentStep} />
         </div>
 
-        {currentStep == 1 || currentStep == 2 ? (
-          <CustomBtn
-            text={`${
-              currentStep === 1
-                ? 'Run Backtest'
-                : currentStep === 2
-                ? 'Save Strategy'
-                : ''
-            }`}
-            xtraStyles="!max-w-[20.3125rem] md:w-[30%]"
-            onClick={handleNextStep}
-          />
-        ) : null}
+        <CustomBtn
+          text={`${
+            currentStep === 1
+              ? 'Run Backtest'
+              : currentStep === 2
+              ? 'Save Strategy'
+              : 'Deposit & Start'
+          }`}
+          disabled={disabled}
+          xtraStyles={`!max-w-[20.3125rem] !w-full`}
+          onClick={handleNextStep}
+        />
       </div>
       {currentStep == 1 || currentStep == 2 ? (
         <div className="flex items-center justify-between mt-8 mb-6 flex-wrap gap-y-4 md:gap-y-0">
@@ -214,7 +243,7 @@ const Training: React.FC<ITrainingProps> = ({
                 : ''
             }`}
           </h2>
-          <div className="max-w-[20.25rem] w-[80%] h-[1.9375rem]">
+          <div className="max-w-[20.3125rem] w-[80%] h-[1.9375rem]">
             <Switcher
               keyQuery="time"
               query={timeQuery}
@@ -343,128 +372,109 @@ const Training: React.FC<ITrainingProps> = ({
               />
             </div>
           ) : currentStep == 3 ? (
-            <div className="mt-14">
-              <h1 className="text-2xl font-semibold text-dark-300 mb-6">
-                Choose an exchange
-              </h1>
-
-              <div className="w-[20.3125rem] relative">
-                <CustomText
-                  text="Select Exchange"
-                  toolTipWidth="w-[8rem]"
-                  hasQuestionMark={false}
-                  xtraStyle="mb-4 font-semibold text-xs uppercase"
-                />
-                <CustomDropdown options={options} onSelect={() => {}} />
-                <div className="absolute bottom-0 right-[-3rem] flex justify-center items-center cursor-pointer w-[2.25rem] h-[2.25rem] rounded-full bg-blue-100 text-blue-400 transition-colors duration-300 hover:bg-blue-400 hover:text-blue-100">
-                  <LinkIcon />
-                </div>
-              </div>
-
-              <div className="w-[20.3125rem] mt-8">
-                <CustomText
-                  text="mango Account Address"
-                  toolTipWidth="w-[12rem]"
-                  showOptText
-                  toolTipText="Robotter need the Mango Markets account address to trade."
-                  xtraStyle="mb-4 font-semibold text-xs uppercase"
-                />
-                <input
-                  className="bg-light-200 rounded-[22px] w-full h-[2.25rem] px-4 border text-sm border-transparent text-blue-400 focus:outline-blue-300 hover:border-blue-300/50 disabled:cursor-not-allowed"
-                  name=""
-                  defaultValue={`5ikB...yDEG`}
-                />
-              </div>
-
-              <CustomBtn
-                text={`Connect to Exchange`}
-                xtraStyles="!max-w-[20.3125rem] md:w-[30%] !mt-12"
-                onClick={handleNextStep}
-              />
-            </div>
-          ) : currentStep == 4 ? (
-            <div className="mt-14 flex justify-between">
+            <div className="mt-14 flex justify-between flex-wrap">
               <div id="left">
-                <CustomText
-                  text="Top up your trading bot balance"
-                  toolTipWidth="w-[8rem]"
-                  xtraStyle="mb-7 font-semibold text-dark-300 !text-2xl"
-                />
+                <div className="grid grid-cols-2 gap-x-6">
+                  <div className="w-[20.3125rem]">
+                    <h1 className="mb-7 font-semibold text-dark-300 text-2xl">
+                      Connect exchange
+                    </h1>
+                    <CustomText
+                      text="Exchange"
+                      toolTipWidth="w-[14rem]"
+                      toolTipText={`Robotter need an exchange to trade.`}
+                      xtraStyle="mb-4 font-semibold text-xs uppercase"
+                    />
+                    <CustomInput
+                      icon={<MangoLogo />}
+                      disabled
+                      defaultValue={'Mango Market'}
+                    />
+                  </div>
 
-                <div className="w-[20.3125rem]">
-                  <CustomText
-                    text="How much would you like to top up?"
-                    toolTipWidth="w-[8rem]"
-                    hasQuestionMark={false}
-                    xtraStyle="mb-4 font-semibold text-xs uppercase"
-                  />
-                  <input
-                    className="bg-light-200 rounded-[22px] w-full h-[2.25rem] px-4 border text-sm border-transparent text-blue-400 focus:outline-blue-300 hover:border-blue-300/50 disabled:cursor-not-allowed"
-                    name=""
-                    defaultValue={`$ 1487`}
-                  />
+                  <div className="w-[20.3125rem]">
+                    <h1 className="mb-7 font-semibold text-dark-300 text-2xl">
+                      Trading time limit
+                    </h1>
+                    <CustomText
+                      text="End date of trading"
+                      toolTipWidth="w-[14rem]"
+                      toolTipText={`Select the date when trading will stop. Trading duration impacts Compute expenses and Solana fees.`}
+                      xtraStyle="mb-4 font-semibold text-xs uppercase"
+                    />
+                    <CustomDatePicker getUnixTimeStamp={endDateUnix} isEmpty />
+                  </div>
                 </div>
 
-                <div className="w-[20.3125rem] mt-8">
-                  <CustomText
-                    text="End date of trading"
-                    toolTipWidth="w-[12rem]"
-                    hasQuestionMark={false}
-                    xtraStyle="mb-4 font-semibold text-xs uppercase"
-                  />
-                  <CustomDatePicker
-                    direction="right"
-                    getUnixTimeStamp={endTimeUnix}
-                  />
-                </div>
+                <h1 className="mt-7 mb-5 font-semibold text-dark-300 !text-2xl">
+                  Deposit both coins to start
+                </h1>
 
-                <CustomBtn
-                  text={`Top Up`}
-                  xtraStyles="!max-w-[20.3125rem] md:w-full !mt-12"
-                  onClick={handleNextStep}
-                />
+                <div className="grid grid-cols-2 gap-x-6 gap-y-6">
+                  {[
+                    { icon: <SolanaLogo />, text: 'SOL' },
+                    { icon: <USDCLogo />, text: 'USDC' },
+                  ].map(({ icon, text }, idx) => (
+                    <Fragment key={idx}>
+                      <div className="w-full max-w-[20.3125rem]">
+                        <CustomText
+                          text="Coin"
+                          hasQuestionMark={false}
+                          xtraStyle="mb-3 font-semibold text-xs uppercase"
+                        />
+                        <CustomInput icon={icon} disabled defaultValue={text} />
+                      </div>
+                      <div className="w-full max-w-[20.3125rem]">
+                        <CustomText
+                          text="Amount"
+                          hasQuestionMark={false}
+                          xtraStyle="mb-3 font-semibold text-xs uppercase"
+                        />
+                        <CustomInput
+                          type="number"
+                          placeholder="0"
+                          name={text}
+                          value={coinValue[text]}
+                          onChange={handleOnCoinInputChange}
+                        />
+                      </div>
+                    </Fragment>
+                  ))}
+                </div>
               </div>
 
               <div
                 id="right"
-                className="w-[20.3125rem] bg-blue-100 rounded-[22px] p-6 h-fit"
+                className="max-w-[20.3125rem] w-full bg-light-300 rounded-[22px] p-6 h-fit"
               >
-                <CustomText
-                  text="Monthly expenses"
-                  toolTipWidth="w-[8rem]"
-                  xtraStyle="mb-7 !font-bold !text-blue-400 !text-xl !mx-auto"
-                />
+                <h1 className="mb-7 font-semibold text-blue-400 text-xs text-center uppercase">
+                  Deposit Info
+                </h1>
 
-                <div id="table" className="grid grid-cols-2 mb-5">
-                  {[
-                    { t: 'Trading expenses', a: 8 },
-                    { t: 'Solana fees', a: 5 },
-                  ].map(({ t, a }, i) => (
+                <div id="table" className="grid grid-cols-[auto_6.2rem]">
+                  {depositInfo.map(({ l, r, icon }, i) => (
                     <Fragment key={i}>
                       <span
                         className={`font-normal text-sm text-dark-200 text-left ${
                           i == 0 ? 'border-t' : 'border-y'
                         } p-[0.5rem] border-white`}
                       >
-                        {t}
+                        {l}
                       </span>
                       <span
-                        className={`font-normal text-sm text-dark-300 text-right ${
+                        className={`flex items-center justify-end gap-x-2 font-normal text-sm text-dark-300 text-right ${
                           i == 0 ? 'border-t' : 'border-y'
-                        } p-[0.5rem] border-white`}
+                        } p-[0.5rem] border-white ${
+                          depositInfo.length === i + 1
+                            ? 'text-base font-medium'
+                            : ''
+                        }`}
                       >
-                        ${a}
+                        {r} {icon && icon}
                       </span>
                     </Fragment>
                   ))}
                 </div>
-
-                <p className="font-bold text-[2rem] text-center text-dark-300">
-                  $13
-                </p>
-                <p className="font-normal text-xs text-center text-dark-100">
-                  Total
-                </p>
               </div>
             </div>
           ) : null}

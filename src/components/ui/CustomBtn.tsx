@@ -65,7 +65,7 @@ const CustomBtn: React.FC<ButtonProps> = ({
   ...rest
 }) => {
   const btnClassnames = `
-    flex justify-center items-center relative px-5 !text-white text-center border disabled:opacity-40 border-transparent rounded-[76px] whitespace-nowrap disabled:cursor-not-allowed transition-colors duration-300
+    flex justify-center items-center relative px-5 !text-white text-center border border-transparent rounded-[76px] whitespace-nowrap disabled:cursor-not-allowed transition-colors duration-300
     ${size === 'sm' ? 'h-[1.4375rem] text-xs font-normal px-2 py-1' : ''}
     ${size === 'lg' ? 'h-[2.75rem] py-[9px] text-base font-semibold' : ''}
     ${
@@ -80,7 +80,7 @@ const CustomBtn: React.FC<ButtonProps> = ({
     }
     ${
       btnStyle === 'solid-primary'
-        ? 'bg-gradient-to-r from-blue-500 to-dark-500 hover:bg-gradient-to-t hover:from-blue-600 hover:to-dark-600 hover:!text-turkish'
+        ? 'bg-gradient-to-r from-blue-500 to-dark-500 hover:bg-gradient-to-t hover:from-blue-600 hover:to-dark-600 hover:!text-turkish disabled:from-light-400 disabled:to-light-400 disabled:hover:!text-white'
         : ''
     }
     ${fullWidth ? 'w-full' : ''}
