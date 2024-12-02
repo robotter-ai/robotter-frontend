@@ -46,6 +46,7 @@ const OverviewBots: React.FC = () => {
     solData,
     searchParams,
     setSearchParams,
+    depositInfo
   } = useProfile();
 
   const { botsData } = useAppSelector((state) => state.auth);
@@ -101,6 +102,7 @@ const OverviewBots: React.FC = () => {
         cardBotData={cardBotDataBT}
         resultStatTab={resultStratTabs}
         resultStatQuery={resultStatQuery}
+        depositInfo={depositInfo}
       />
     ),
     bots: (
