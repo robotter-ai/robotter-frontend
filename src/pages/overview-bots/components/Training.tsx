@@ -41,6 +41,9 @@ import CardBot from './CardBot';
 import GoBack from './GoBack';
 import LineTab from './LineTab';
 import CustomInput from '@components/ui/CustomInput';
+import { useAppDispatch, useAppSelector } from '@shared/hooks/useStore';
+import { setCoinValues, setEndDate } from '@slices/generalSlice';
+import { getDaysBtnDates } from '@utils/getDaysBtnDates.util';
 
 export interface ITrainingProps {
   timeQuery: ITimeTab;
@@ -57,6 +60,12 @@ export interface ITrainingProps {
 
 interface ValueType {
   [key: string]: number | string | boolean;
+}
+
+interface ITimestamp {
+  startTime: number;
+  endTime: number;
+  endDate: Date | null;
 }
 
 const Training: React.FC<ITrainingProps> = ({
@@ -89,15 +98,17 @@ const Training: React.FC<ITrainingProps> = ({
   const [advancedSettingsOpen, setAdancedSettingsOpen] = useState(false);
   const [value, setValue] = useState<ValueType>(Object.fromEntries(valueArr));
   const [tradePair, setTradePair] = useState('SOL/BNB');
-  const [timeStamp, setTimeStamp] = useState({
+  const [timeStamp, setTimeStamp] = useState<ITimestamp>({
     startTime: 1727771877,
     endTime: 1728376677,
-    endDate: 0,
+    endDate: null,
   });
   const [coinValue, setCoinValue] = useState<{ [key: string]: string }>({
     SOL: '',
     USDC: '',
   });
+  const { endDate } = useAppSelector((state) => state.general);
+  const dispatch = useAppDispatch();
 
   const uniqueGroups = Array.from(
     new Set(Object.values(config[cfgName]).map((item) => item.group))
@@ -118,6 +129,8 @@ const Training: React.FC<ITrainingProps> = ({
     { label: 'Polka DEX', value: '6' },
     { label: 'Uniswap', value: '7' },
   ];
+
+  const numOfTradeDays = getDaysBtnDates(endDate ? endDate : new Date());
 
   const toggleAdancedSettingsOpen = () =>
     setAdancedSettingsOpen((prevState) => !prevState);
@@ -151,6 +164,7 @@ const Training: React.FC<ITrainingProps> = ({
     const { value, name } = evt.target;
     if (!/^\d*$/.test(value)) return;
     setCoinValue((prevState) => ({ ...prevState, [name]: value }));
+    dispatch(setCoinValues({ [name]: +value }));
   };
 
   const handleOnToggle = (isOn: boolean, key: string) => {
@@ -175,8 +189,9 @@ const Training: React.FC<ITrainingProps> = ({
     setTimeStamp((prevState) => ({ ...prevState, endTime: unix }));
   };
 
-  const endDateUnix = (unix: number) => {
-    setTimeStamp((prevState) => ({ ...prevState, endDate: unix }));
+  const getEndDate = (date: Date) => {
+    setTimeStamp((prevState) => ({ ...prevState, endDate: date }));
+    dispatch(setEndDate(date));
   };
 
   const handleCandleData = useCallback(async () => {
@@ -199,9 +214,10 @@ const Training: React.FC<ITrainingProps> = ({
   }, [tradePair, timeStamp]);
 
   const disabled =
-    currentStep === 3 ?
-    Object.values(coinValue).some((num) => num === '' || +num <= 0) ||
-    timeStamp.endDate === 0 : false;
+    currentStep === 3
+      ? Object.values(coinValue).some((num) => num === '' || +num <= 0) ||
+        numOfTradeDays <= 0
+      : false;
 
   return (
     <div ref={parentRef}>
@@ -402,7 +418,7 @@ const Training: React.FC<ITrainingProps> = ({
                       toolTipText={`Select the date when trading will stop. Trading duration impacts Compute expenses and Solana fees.`}
                       xtraStyle="mb-4 font-semibold text-xs uppercase"
                     />
-                    <CustomDatePicker getUnixTimeStamp={endDateUnix} isEmpty />
+                    <CustomDatePicker getDate={getEndDate} isEmpty />
                   </div>
                 </div>
 
@@ -454,14 +470,14 @@ const Training: React.FC<ITrainingProps> = ({
                 <div id="table" className="grid grid-cols-[auto_6.2rem]">
                   {depositInfo.map(({ l, r, icon }, i) => (
                     <Fragment key={i}>
-                      <span
+                      <div
                         className={`font-normal text-sm text-dark-200 text-left ${
                           i == 0 ? 'border-t' : 'border-y'
                         } p-[0.5rem] border-white`}
                       >
                         {l}
-                      </span>
-                      <span
+                      </div>
+                      <div
                         className={`flex items-center justify-end gap-x-2 font-normal text-sm text-dark-300 text-right ${
                           i == 0 ? 'border-t' : 'border-y'
                         } p-[0.5rem] border-white ${
@@ -470,8 +486,8 @@ const Training: React.FC<ITrainingProps> = ({
                             : ''
                         }`}
                       >
-                        {r} {icon && icon}
-                      </span>
+                        {r} {icon && <span>{icon}</span>}
+                      </div>
                     </Fragment>
                   ))}
                 </div>
