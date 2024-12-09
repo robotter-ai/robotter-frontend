@@ -1,4 +1,5 @@
 import { createElement, ReactNode, useEffect, useState } from 'react';
+import { getDaysBtnDates } from '@utils/getDaysBtnDates.util';
 import { useSearchParams } from 'react-router-dom';
 import usePageTitle from '@shared/hooks/usePageTitle';
 import { useAppSelector } from '@shared/hooks/useStore';
@@ -110,15 +111,10 @@ export interface IDepositInfo {
 
 export default () => {
   const { address } = useAppSelector((state) => state.auth);
+  const { coinValue, endDate } = useAppSelector((state) => state.general);
   const [searchParams, setSearchParams] = useSearchParams();
   const { setTitle } = usePageTitle();
-
   const [search, setSearch] = useState('');
-
-  // const { data } = useGetUserInfoQuery({ address: session?.address });
-
-  // const user = data as IUserInfo;
-
   const query: ITab = (searchParams.get('tab') as ITab) || 'overview';
   const dateQuery = (searchParams.get('date') as IDateTab) || 'week';
   const cryptoQuery = (searchParams.get('crypto') as ICryptoTab) || 'all';
@@ -977,13 +973,15 @@ export default () => {
     ['Timespan', '2024-05-01 / 2024-05-31'],
   ];
 
+  const numOfTradeDays = getDaysBtnDates(endDate ? endDate : new Date());
+
   const depositInfo: IDepositInfo[] = [
     { l: 'Market', r: 'SOL / USDC', icon: null },
-    { l: 'Number of trading days', r: '0', icon: null },
+    { l: 'Number of trading days', r: `${numOfTradeDays}`, icon: null },
     { l: 'Compute expenses', r: '$0', icon: null },
     { l: 'Solana fees', r: '$0', icon: null },
-    { l: 'SOL', r: '0', icon: createElement(SolanaLogo) },
-    { l: 'USDC', r: '0', icon: createElement(USDCLogo) },
+    { l: 'SOL', r: `${coinValue.SOL}`, icon: createElement(SolanaLogo) },
+    { l: 'USDC', r: `${coinValue.USDC}`, icon: createElement(USDCLogo) },
     { l: 'Total', r: '$0', icon: null },
   ];
 

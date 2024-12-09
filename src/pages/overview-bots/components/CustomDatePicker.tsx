@@ -9,13 +9,14 @@ type ValuePiece = Date | null;
 type Value = ValuePiece | [ValuePiece, ValuePiece];
 
 interface ICustomDatePickerProps {
-  getUnixTimeStamp: (unixTimeStamp: number) => void;
+  getUnixTimeStamp?: (unixTimeStamp: number) => void;
   direction?: 'right' | 'left' | 'bottom' | 'top';
-  isEmpty?: boolean
+  getDate?: (date: Date) => void;
+  isEmpty?: boolean;
 }
 
 const CustomDatePicker = forwardRef<HTMLDivElement, ICustomDatePickerProps>(
-  ({ getUnixTimeStamp, direction = 'bottom', isEmpty }, ref) => {
+  ({ getUnixTimeStamp, getDate, direction = 'bottom', isEmpty }, ref) => {
     const [value, setValue] = useState<Value>(isEmpty ? null : new Date());
     const [isCalendarOpen, setIsCalendarOpen] = useState(false);
     const [activeMonth, setActiveMonth] = useState(new Date());
@@ -59,7 +60,8 @@ const CustomDatePicker = forwardRef<HTMLDivElement, ICustomDatePickerProps>(
 
       if (date instanceof Date) {
         const unixTimestamp = Math.floor(date.getTime() / 1000);
-        getUnixTimeStamp(unixTimestamp);
+        getUnixTimeStamp && getUnixTimeStamp(unixTimestamp);
+        getDate && getDate(date);
       }
 
       setIsCalendarOpen(false);
@@ -137,10 +139,10 @@ const CustomDatePicker = forwardRef<HTMLDivElement, ICustomDatePickerProps>(
             isCalendarOpen ? 'outline-blue-300 hover:border-white' : ''
           }`}
         >
-          <span className={`${!value ? 'text-sm font-normal text-blue-200' : ''}`}>
-            {value
-              ? (value as Date).toLocaleDateString('en-CA')
-              : 'YYYY-MM-DD'}
+          <span
+            className={`${!value ? 'text-sm font-normal text-blue-200' : ''}`}
+          >
+            {value ? (value as Date).toLocaleDateString('en-CA') : 'YYYY-MM-DD'}
           </span>
         </div>
 
