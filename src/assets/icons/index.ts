@@ -48,6 +48,15 @@ import { ReactComponent as MetaMaskIcon } from '@assets/icons/Metamask.svg';
 import { ReactComponent as PointerIcon } from '@assets/icons/pointer.svg';
 import { ReactComponent as PointerBottomIcon } from '@assets/icons/pointer-bottom.svg';
 import { ReactComponent as LinkIcon } from '@assets/icons/link.svg';
+import { ReactComponent as BackPackLogo } from '@assets/icons/Backpack.svg';
+import { ReactComponent as BONKLogo } from '@assets/icons/BONK.svg';
+import { ReactComponent as BTCLogo } from '@assets/icons/BTC.svg';
+import { ReactComponent as ETHLogo } from '@assets/icons/ETH.svg';
+import { ReactComponent as MangoLogo } from '@assets/icons/Mango.svg';
+import { ReactComponent as SolanaLogo } from '@assets/icons/Solana.svg';
+import { ReactComponent as SolflareLogo } from '@assets/icons/Solflare.svg';
+import { ReactComponent as USDCLogo } from '@assets/icons/USDC.svg';
+import { ReactComponent as USDTLogo } from '@assets/icons/USDT.svg';
 
 export {
   AlarmClockIcon,
@@ -99,5 +108,14 @@ export {
   MetaMaskIcon,
   PointerIcon,
   PointerBottomIcon,
-  LinkIcon
+  LinkIcon,
+  BONKLogo,
+  BTCLogo,
+  BackPackLogo,
+  ETHLogo,
+  MangoLogo,
+  SolanaLogo,
+  SolflareLogo,
+  USDCLogo,
+  USDTLogo,
 };

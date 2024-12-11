@@ -112,6 +112,7 @@ export const useTransactions = () => {
       try {
         const uuid = uuidv4();
         const { parameters: strategyParameters } = getRandomStrategy();
+        console.log('depositRequest', depositRequest);
 
         const instanceResult = await createInstance({
           strategy_name: uuid,

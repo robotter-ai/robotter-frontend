@@ -1,161 +1,146 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState, Fragment } from 'react';
 import TextInput from '@components/form/TextInput';
 import CustomBtn from '@components/ui/CustomBtn';
 import CustomDropdown from './CustomDropdown';
-import { useTransactions } from '@shared/hooks/useTransaction';
+import CustomText from './CustomText';
+import { MangoLogo, SolanaLogo, USDCLogo } from '@assets/icons';
+import CustomInput from '@components/ui/CustomInput';
+import CustomDatePicker from './CustomDatePicker';
+import { IDepositInfo } from '../hooks/useProfile';
 
 interface ExchangeOption {
-    label: string;
-    value: string;
-  }
-  
-  interface DepositProps {
-    exchanges: ExchangeOption[];
-  }
-  
-  interface DepositInfo {
-    tradingDays: number;
-    solanaFees: string;
-  }
+  label: string;
+  value: string;
+}
 
-  const SOLANA_FEE_PER_DAY = 0.1;
+interface DepositProps {
+  exchanges: ExchangeOption[];
+  depositInfo: IDepositInfo[];
+  endDateUnix: (unix: number) => void;
+  coinValue: { [key: string]: string };
+  handleOnCoinInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}
 
-const Deposit: React.FC<DepositProps> = ({ exchanges }) => {
-  const [solAmount, setSolAmount] = useState(0);
-  const [usdcAmount, setUsdcAmount] = useState(0);
-  const [endDate, setEndDate] = useState<string>('');
-  const { deposit } = useTransactions();
+interface FeesInfo {
+  tradingDays: number;
+  solanaFees: string;
+}
 
-  const handleDeposit = async () => {
-      await deposit({
-        balanceA: solAmount,
-        balanceB: usdcAmount,
-        feesAmount: depositInfo.solanaFees,
-        mintA: 'SOL',
-        mintB: 'USDC',
-      });
-  };
+const SOLANA_FEE_PER_DAY = 0.1;
 
-  const depositInfo = useMemo<DepositInfo>(() => {
-    if (!endDate) {
-      return {
-        tradingDays: 0,
-        solanaFees: '0.00'
-      };
-    }
-
-    const end = new Date(endDate);
-    const start = new Date();
-    const diffTime = Math.abs(end.getTime() - start.getTime());
-    const tradingDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    const solanaFees = (tradingDays * SOLANA_FEE_PER_DAY).toFixed(2);
-
-    return {
-      tradingDays,
-      solanaFees
-    };
-  }, [endDate]); // Only recalculate when endDate changes
-
-  const handleDateChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setEndDate(e.target.value);
-  }, []);
-  
+const Deposit: React.FC<DepositProps> = ({ 
+  exchanges, 
+  depositInfo, 
+  endDateUnix, 
+  coinValue, 
+  handleOnCoinInputChange 
+}) => {
   return (
-    <div className="flex flex-col lg:flex-row gap-8 mt-8">
-      {/* Form Section - 70% width on desktop */}
-      <div className="w-full lg:w-[70%] space-y-8">
-        {/* Exchange and Trading Time in same row */}
-        <h2 className="text-xl mb-4">Deposit</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="flex flex-col">
-            <label className="mb-2">Exchange</label>
-            <CustomDropdown
-              options={exchanges}
-              onSelect={(value) => console.log(value)}
-              placeholder="Select Exchange"
+    <div className="mt-14 flex justify-between flex-wrap">
+      <div id="left">
+        <div className="grid grid-cols-2 gap-x-6">
+          <div className="w-[20.3125rem]">
+            <h1 className="mb-7 font-semibold text-dark-300 text-2xl">
+              Connect exchange
+            </h1>
+            <CustomText
+              text="Exchange"
+              toolTipWidth="w-[14rem]"
+              toolTipText={`Robotter need an exchange to trade.`}
+              xtraStyle="mb-4 font-semibold text-xs uppercase"
+            />
+            <CustomInput
+              icon={<MangoLogo />}
+              disabled
+              defaultValue={'Mango Market'}
             />
           </div>
-          <div className="flex flex-col">
-            <label className="mb-2">End Date of Trading</label>
-            <TextInput
-              type="date"
-              placeholder="dd/mm/yyyy"
-              value={endDate}
-              onChange={handleDateChange}
+
+          <div className="w-[20.3125rem]">
+            <h1 className="mb-7 font-semibold text-dark-300 text-2xl">
+              Trading time limit
+            </h1>
+            <CustomText
+              text="End date of trading"
+              toolTipWidth="w-[14rem]"
+              toolTipText={`Select the date when trading will stop. Trading duration impacts Compute expenses and Solana fees.`}
+              xtraStyle="mb-4 font-semibold text-xs uppercase"
             />
+            <CustomDatePicker getUnixTimeStamp={endDateUnix} isEmpty />
           </div>
         </div>
 
-        {/* Deposit Form */}
-        <div>
-          <div className="space-y-6">
-            {/* SOL Input */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="mb-2 block">Coin</label>
-                <CustomDropdown
-                  options={[{ label: 'SOL', value: 'SOL' }]}
-                  onSelect={(value) => console.log(value)}
-                  placeholder="SOL"
-                  disabled={true}
-                />
-              </div>
-              <div>
-                <label className="mb-2 block">Amount</label>
-                <TextInput
-                  type="number"
-                  value={solAmount}
-                  onChange={(e) => setSolAmount(Number(e.target.value))}
-                  placeholder="Amount"
-                />
-              </div>
-            </div>
+        <h1 className="mt-7 mb-5 font-semibold text-dark-300 !text-2xl">
+          Deposit both coins to start
+        </h1>
 
-            {/* USDC Input */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="mb-2 block">Coin</label>
-                <CustomDropdown
-                  options={[{ label: 'USDC', value: 'USDC' }]}
-                  onSelect={(value) => console.log(value)}
-                  placeholder="USDC"
-                  disabled={true}
+        <div className="grid grid-cols-2 gap-x-6 gap-y-6">
+          {[
+            { icon: <SolanaLogo />, text: 'SOL' },
+            { icon: <USDCLogo />, text: 'USDC' },
+          ].map(({ icon, text }, idx) => (
+            <Fragment key={idx}>
+              <div className="w-full max-w-[20.3125rem]">
+                <CustomText
+                  text="Coin"
+                  hasQuestionMark={false}
+                  xtraStyle="mb-3 font-semibold text-xs uppercase"
                 />
+                <CustomInput icon={icon} disabled defaultValue={text} />
               </div>
-              <div>
-                <label className="mb-2 block">Amount</label>
-                <TextInput
+              <div className="w-full max-w-[20.3125rem]">
+                <CustomText
+                  text="Amount"
+                  hasQuestionMark={false}
+                  xtraStyle="mb-3 font-semibold text-xs uppercase"
+                />
+                <CustomInput
                   type="number"
-                  value={usdcAmount}
-                  onChange={(e) => setUsdcAmount(Number(e.target.value))}
-                  placeholder="Amount"
+                  placeholder="0"
+                  name={text}
+                  value={coinValue[text]}
+                  onChange={handleOnCoinInputChange}
+                  min="0"
+                  step="any"
                 />
               </div>
-            </div>
-          </div>
+            </Fragment>
+          ))}
         </div>
       </div>
 
-      {/* Deposit Info Card */}
-      <div className="w-full lg:w-[30%] space-y-4">
-        <CustomBtn
-          text="Deposit & Start"
-          className="w-full bg-teal-500 text-white px-8 py-3 rounded-full hover:bg-teal-600 transition-colors"
-          onClick={handleDeposit}
-        />
-        <div className="p-6 bg-gray-50 rounded-lg">
-          <div className="flex justify-between items-start">
-            <div className="space-y-2">
-              <h3 className="text-lg">Deposit Info</h3>
-              <div className="space-y-1 text-gray-600">
-              <p>Number of trading days: {depositInfo.tradingDays}</p>
-              <p>Solana fees: ${depositInfo.solanaFees}</p>
-                <p>SOL: {solAmount}</p>
-                <p>USDC: {usdcAmount}</p>
-              </div>
-            </div>
-          </div>
-        </div>      
+      <div
+        id="right"
+        className="max-w-[20.3125rem] w-full bg-light-300 rounded-[22px] p-6 h-fit"
+      >
+        <h1 className="mb-7 font-semibold text-blue-400 text-xs text-center uppercase">
+          Deposit Info
+        </h1>
+
+        <div id="table" className="grid grid-cols-[auto_6.2rem]">
+          {depositInfo.map(({ l, r, icon }, i) => (
+            <Fragment key={i}>
+              <span
+                className={`font-normal text-sm text-dark-200 text-left ${
+                  i == 0 ? 'border-t' : 'border-y'
+                } p-[0.5rem] border-white`}
+              >
+                {l}
+              </span>
+              <span
+                className={`flex items-center justify-end gap-x-2 font-normal text-sm text-dark-300 text-right ${
+                  i == 0 ? 'border-t' : 'border-y'
+                } p-[0.5rem] border-white ${
+                  depositInfo.length === i + 1
+                    ? 'text-base font-medium'
+                    : ''
+                }`}
+              >
+                {r} {icon && icon}
+              </span>
+            </Fragment>
+          ))}
+        </div>
       </div>
     </div>
   );

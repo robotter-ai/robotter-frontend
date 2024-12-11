@@ -1,9 +1,15 @@
 import { strategiesConfigData as config } from '../../../utils/strategyConfigData';
+import {
+  ArrowDown2Icon,
+  ArrowUp2Icon,
+  MangoLogo,
+  SolanaLogo,
+  USDCLogo,
+} from '@assets/icons';
 import { useGetHistoricalCandlesMutation } from '@store/market/api';
 import { defaultType } from '../../../utils/defaultType.util';
 import { transformData } from '../../../utils/transformData';
 import { updateDefaults } from '../../../utils/updateDefault';
-import { ArrowDown2Icon, ArrowUp2Icon, LinkIcon } from '@assets/icons';
 import { SetURLSearchParams } from 'react-router-dom';
 import CandlestickChart from './CandlestickChart';
 import CustomDatePicker from './CustomDatePicker';
@@ -24,6 +30,7 @@ import React, {
 } from 'react';
 import {
   ICardBotData,
+  IDepositInfo,
   IResultStrat,
   ITabs,
   ITimeTab,
@@ -34,6 +41,7 @@ import CardBot from './CardBot';
 import GoBack from './GoBack';
 import LineTab from './LineTab';
 import Deposit from './Deposit';
+import { useTransactions } from '@shared/hooks/useTransaction';
 
 export interface ITrainingProps {
   timeQuery: ITimeTab;
@@ -45,6 +53,7 @@ export interface ITrainingProps {
   resultStatQuery: IResultStrat;
   bigStatTable: string[][];
   bigResultTable: string[][];
+  depositInfo: IDepositInfo[];
 }
 
 interface ValueType {
@@ -61,6 +70,7 @@ const Training: React.FC<ITrainingProps> = ({
   searchParams,
   setSearchParams,
   cardBotData,
+  depositInfo,
 }) => {
   const [historicalCandlesData, { isLoading, data, error }] =
     useGetHistoricalCandlesMutation();
@@ -83,7 +93,13 @@ const Training: React.FC<ITrainingProps> = ({
   const [timeStamp, setTimeStamp] = useState({
     startTime: 1727771877,
     endTime: 1728376677,
+    endDate: 0,
   });
+  const [coinValue, setCoinValue] = useState<{ [key: string]: string }>({
+    SOL: '',
+    USDC: '',
+  });
+  const { deposit } = useTransactions();
 
   const uniqueGroups = Array.from(
     new Set(Object.values(config[cfgName]).map((item) => item.group))
@@ -133,12 +149,18 @@ const Training: React.FC<ITrainingProps> = ({
     setValue((prevState) => ({ ...prevState, [name]: value }));
   };
 
+  const handleOnCoinInputChange = (evt: ChangeEvent<HTMLInputElement>) => {
+    const { value, name } = evt.target;
+    if (!/^\d*\.?\d*$/.test(value)) return;
+    setCoinValue((prevState) => ({ ...prevState, [name]: value }));
+  };
+
   const handleOnToggle = (isOn: boolean, key: string) => {
     setValue((prevState) => ({ ...prevState, [key]: isOn }));
   };
 
   const handleNextStep = () => {
-    if (currentStep === 4) return;
+    if (currentStep === 3) return;
     setCurrentStep((prevState) => prevState + 1);
   };
 
@@ -153,6 +175,10 @@ const Training: React.FC<ITrainingProps> = ({
 
   const endTimeUnix = (unix: number) => {
     setTimeStamp((prevState) => ({ ...prevState, endTime: unix }));
+  };
+
+  const endDateUnix = (unix: number) => {
+    setTimeStamp((prevState) => ({ ...prevState, endDate: unix }));
   };
 
   const handleCandleData = useCallback(async () => {
@@ -174,6 +200,42 @@ const Training: React.FC<ITrainingProps> = ({
     handleCandleData();
   }, [tradePair, timeStamp]);
 
+  const handleMainButtonClick = async () => {
+    if (currentStep === 1) {
+      // Handle Run Backtest
+      handleNextStep();
+    } else if (currentStep === 2) {
+      // Handle Save Strategy
+      handleNextStep();
+    } else if (currentStep === 3) {
+      // Handle Deposit & Start
+      try {
+        await deposit({
+          balanceA: Number(coinValue['SOL']) || 0,
+          balanceB: Number(coinValue['USDC']) || 0,
+          feesAmount: depositInfo.find(item => item.l === 'Solana fees')?.r || '0',
+          mintA: 'SOL',
+          mintB: 'USDC',
+        });
+        handleNextStep();
+      } catch (error) {
+        console.error('Deposit failed:', error);
+        // Handle error (maybe add a toast notification)
+      }
+    }
+  };
+
+  const isButtonDisabled = useCallback(() => {
+    if (currentStep === 3) {
+      return !coinValue['SOL'] || 
+             !coinValue['USDC'] || 
+             Number(coinValue['SOL']) <= 0 || 
+             Number(coinValue['USDC']) <= 0 ||
+             timeStamp.endDate === 0;
+    }
+    return false;
+  }, [currentStep, coinValue, timeStamp.endDate]);
+
   return (
     <div ref={parentRef}>
       <p className="text-dark-100 text-[0.625rem] text-left mt-8 ml-1">
@@ -182,27 +244,26 @@ const Training: React.FC<ITrainingProps> = ({
       <div
         id="training_header"
         className={`flex flex-col md:flex-row gap-y-12 md:gap-y-3 justify-between items-center ${
-          currentStep >= 3 ? 'mt-[0.55rem]' : 'mt-[-3px]'
+          currentStep >= 4 ? 'mt-[0.55rem]' : 'mt-[-3px]'
         }`}
       >
         <div className="flex flex-col md:flex-row gap-y-4 lg:gap-y-0 md:gap-x-3 w-full">
-          <GoBack onClick={handlePrevStep} />
-          <Stepper currentStep={currentStep} />
+          <GoBack onClick={handlePrevStep} disabled={currentStep <= 1} />
+          <Stepper currentStep={currentStep} setCurrentStep={setCurrentStep} />
         </div>
 
-        {currentStep == 1 || currentStep == 2 ? (
-          <CustomBtn
-            text={`${
-              currentStep === 1
-                ? 'Run Backtest'
-                : currentStep === 2
-                ? 'Save Strategy'
-                : ''
-            }`}
-            xtraStyles="!max-w-[20.3125rem] md:w-[30%]"
-            onClick={handleNextStep}
-          />
-        ) : null}
+        <CustomBtn
+          text={
+            currentStep === 1
+              ? 'Run Backtest'
+              : currentStep === 2
+              ? 'Save Strategy'
+              : 'Deposit & Start'
+          }
+          disabled={isButtonDisabled()}
+          xtraStyles={`!max-w-[20.3125rem] !w-full`}
+          onClick={handleMainButtonClick}
+        />
       </div>
       {currentStep == 1 || currentStep == 2 ? (
         <div className="flex items-center justify-between mt-8 mb-6 flex-wrap gap-y-4 md:gap-y-0">
@@ -215,7 +276,7 @@ const Training: React.FC<ITrainingProps> = ({
                 : ''
             }`}
           </h2>
-          <div className="max-w-[20.25rem] w-[80%] h-[1.9375rem]">
+          <div className="max-w-[20.3125rem] w-[80%] h-[1.9375rem]">
             <Switcher
               keyQuery="time"
               query={timeQuery}
@@ -346,6 +407,10 @@ const Training: React.FC<ITrainingProps> = ({
           ) : currentStep == 3 ? (
             <Deposit 
               exchanges={options}
+              depositInfo={depositInfo}
+              endDateUnix={endDateUnix}
+              coinValue={coinValue}
+              handleOnCoinInputChange={handleOnCoinInputChange}
             />
           ) : null}
         </div>

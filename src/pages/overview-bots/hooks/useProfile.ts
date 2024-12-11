@@ -1,4 +1,4 @@
-import { createElement, useEffect, useState } from 'react';
+import { createElement, ReactNode, useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import usePageTitle from '@shared/hooks/usePageTitle';
 import { useAppSelector } from '@shared/hooks/useStore';
@@ -6,8 +6,10 @@ import {
   ChartminiIcon,
   FolderIcon,
   HomeIcon,
+  SolanaLogo,
   TrainingIcon,
   TutorialIcon,
+  USDCLogo,
 } from '@assets/icons';
 
 export type ITab = 'overview' | 'datasets' | 'training' | 'bots' | 'tutorial';
@@ -100,6 +102,12 @@ export interface IDateTabs {
   name: string;
 }
 
+export interface IDepositInfo {
+  l: string;
+  r: string;
+  icon: ReactNode | null;
+}
+
 export default () => {
   const { address } = useAppSelector((state) => state.auth);
   const [searchParams, setSearchParams] = useSearchParams();
@@ -176,7 +184,7 @@ export default () => {
   ];
 
   const resultStratTabs: ITabs[] = [
-    { key: 'result', name: 'Result', icon: null },
+    { key: 'result', name: 'Results', icon: null },
     { key: 'strategy', name: 'Strategy', icon: null },
   ];
 
@@ -969,6 +977,16 @@ export default () => {
     ['Timespan', '2024-05-01 / 2024-05-31'],
   ];
 
+  const depositInfo: IDepositInfo[] = [
+    { l: 'Market', r: 'SOL / USDC', icon: null },
+    { l: 'Number of trading days', r: '0', icon: null },
+    { l: 'Compute expenses', r: '$0', icon: null },
+    { l: 'Solana fees', r: '$0', icon: null },
+    { l: 'SOL', r: '0', icon: createElement(SolanaLogo) },
+    { l: 'USDC', r: '0', icon: createElement(USDCLogo) },
+    { l: 'Total', r: '$0', icon: null },
+  ];
+
   useEffect(() => {
     setTitle(PAGE_TITLE[query]);
   }, [query]);
@@ -1013,5 +1031,6 @@ export default () => {
     searchParams,
     setSearchParams,
     address,
+    depositInfo,
   };
 };
