@@ -69,17 +69,23 @@ const CustomDropdown: React.FC<ICustomDropdownProps> = ({
   return (
     <div ref={dropDownRef} className="relative w-full h-[2.25rem]">
       <div
-        className={`px-4 py-2 rounded-[100px] bg-light-200 border border-transparent text-sm cursor-pointer flex items-center justify-between transition-colors hover:border-blue-300 ${
+        className={`pl-4 pr-6 py-2 rounded-[10px] border-none outline outline-1 outline-light-400 text-sm text-dark-300 cursor-pointer flex items-center justify-between transition-colors duration-75 hover:outline-blue-300/40 ${
           disabled
-            ? 'cursor-not-allowed hover:border-transparent'
+            ? 'cursor-not-allowed text-dark-200 bg-light-300 !outline-light-300 hover:!outline-light-300'
             : 'cursor-pointer'
-        } ${isOpen && !disabled ? 'border-blue-300' : ''} ${
+        } ${isOpen && !disabled ? '!outline-blue-300' : ''} ${
           placeholder && !isSelected ? 'text-blue-200' : 'text-blue-400'
         }`}
         onClick={() => setIsOpen(!isOpen)}
       >
         {selectedValue}
-        {isOpen && !disabled ? <ArrowUp2Icon /> : <ArrowDown2Icon />}
+        {!disabled ? (
+          isOpen && !disabled ? (
+            <ArrowUp2Icon className="text-blue-300" />
+          ) : (
+            <ArrowDown2Icon className="text-light-400" />
+          )
+        ) : null}
       </div>
 
       {isOpen && !disabled && (
@@ -87,7 +93,7 @@ const CustomDropdown: React.FC<ICustomDropdownProps> = ({
           {options.map((option, idx) => (
             <div
               key={option.value}
-              className={`relative text-sm p-2 font-normal border-b border-chart-200 hover:bg-chart-200 cursor-pointer ${
+              className={`relative text-sm py-2 font-normal border-b border-chart-200 hover:bg-chart-200 cursor-pointer ${
                 idx === options.length - 1 ? 'border-none' : ''
               }`}
               onClick={() => handleOptionClick(option)}

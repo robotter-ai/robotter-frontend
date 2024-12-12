@@ -38,8 +38,8 @@ import { ReactComponent as ChartminiIcon } from '@assets/icons/Chartmini.svg';
 import { ReactComponent as WalletIcon } from '@assets/icons/Wallet.svg';
 import { ReactComponent as UpIcon } from '@assets/icons/Up.svg';
 import { ReactComponent as DownIcon } from '@assets/icons/Down.svg';
-import { ReactComponent as ArrowUp2Icon } from '@assets/icons/arrowUp.svg';
-import { ReactComponent as ArrowDown2Icon } from '@assets/icons/arrowDown.svg';
+import { ReactComponent as ArrowUp2Icon } from '@assets/icons/arrowUp2.svg';
+import { ReactComponent as ArrowDown2Icon } from '@assets/icons/arrowDown2.svg';
 import { ReactComponent as BackIcon } from '@assets/icons/back.svg';
 import { ReactComponent as ArrowLeftIcon } from '@assets/icons/arrow-left.svg';
 import { ReactComponent as ArrowRightIcon } from '@assets/icons/arrow-right.svg';
@@ -48,7 +48,8 @@ import { ReactComponent as MetaMaskIcon } from '@assets/icons/Metamask.svg';
 import { ReactComponent as PointerIcon } from '@assets/icons/pointer.svg';
 import { ReactComponent as PointerBottomIcon } from '@assets/icons/pointer-bottom.svg';
 import { ReactComponent as LinkIcon } from '@assets/icons/link.svg';
-import { ReactComponent as BackPackLogo } from '@assets/icons/Backpack.svg';
+import { ReactComponent as BotIcon } from '@assets/icons/bot.svg';
+import { ReactComponent as BackPackLogo } from '@assets/icons/backpack.svg';
 import { ReactComponent as BONKLogo } from '@assets/icons/BONK.svg';
 import { ReactComponent as BTCLogo } from '@assets/icons/BTC.svg';
 import { ReactComponent as ETHLogo } from '@assets/icons/ETH.svg';
@@ -109,6 +110,7 @@ export {
   PointerIcon,
   PointerBottomIcon,
   LinkIcon,
+  BotIcon,
   BONKLogo,
   BTCLogo,
   BackPackLogo,
