@@ -1,16 +1,12 @@
 import { strategiesConfigData as config } from '../../../utils/strategyConfigData';
-import {
-  ArrowDown2Icon,
-  ArrowUp2Icon,
-  MangoLogo,
-  SolanaLogo,
-  USDCLogo,
-} from '@assets/icons';
+import { getDaysBtnDates, isTodayOrFuture } from '@utils/getDaysBtnDates.util';
+import { useAppDispatch, useAppSelector } from '@shared/hooks/useStore';
 import { useGetHistoricalCandlesMutation } from '@store/market/api';
 import { defaultType } from '../../../utils/defaultType.util';
 import { transformData } from '../../../utils/transformData';
 import { updateDefaults } from '../../../utils/updateDefault';
 import { SetURLSearchParams } from 'react-router-dom';
+import CustomInput from '@components/ui/CustomInput';
 import CandlestickChart from './CandlestickChart';
 import CustomDatePicker from './CustomDatePicker';
 import CustomBtn from '@components/ui/CustomBtn';
@@ -20,6 +16,13 @@ import { FadeLoader } from 'react-spinners';
 import ButtonList from './ButtonList';
 import CustomText from './CustomText';
 import Pagination from './Pagination';
+import {
+  ArrowDown2Icon,
+  ArrowUp2Icon,
+  MangoLogo,
+  SolanaLogo,
+  USDCLogo,
+} from '@assets/icons';
 import React, {
   ChangeEvent,
   Fragment,
@@ -40,10 +43,11 @@ import Switcher from './Switcher';
 import CardBot from './CardBot';
 import GoBack from './GoBack';
 import LineTab from './LineTab';
-import CustomInput from '@components/ui/CustomInput';
-import { useAppDispatch, useAppSelector } from '@shared/hooks/useStore';
-import { setCoinValues, setEndDate } from '@slices/generalSlice';
-import { getDaysBtnDates } from '@utils/getDaysBtnDates.util';
+import {
+  setCoinValues,
+  setEndDate,
+  setExpensesFee,
+} from '@slices/generalSlice';
 
 export interface ITrainingProps {
   timeQuery: ITimeTab;
@@ -211,12 +215,17 @@ const Training: React.FC<ITrainingProps> = ({
 
   useEffect(() => {
     handleCandleData();
-  }, [tradePair, timeStamp]);
+    const isEmpty = Object.values(coinValue).every((num) => num !== '');
+    dispatch(
+      setExpensesFee({ expenses: isEmpty ? 8 : 0, fee: isEmpty ? 5 : 0 })
+    );
+  }, [tradePair, timeStamp, coinValue]);
 
   const disabled =
     currentStep === 3
       ? Object.values(coinValue).some((num) => num === '' || +num <= 0) ||
-        numOfTradeDays <= 0
+        numOfTradeDays < 0 ||
+        !isTodayOrFuture(timeStamp.endDate)
       : false;
 
   return (
@@ -431,30 +440,39 @@ const Training: React.FC<ITrainingProps> = ({
                     { icon: <SolanaLogo />, text: 'SOL' },
                     { icon: <USDCLogo />, text: 'USDC' },
                   ].map(({ icon, text }, idx) => (
-                    <Fragment key={idx}>
-                      <div className="w-full max-w-[20.3125rem]">
-                        <CustomText
-                          text="Coin"
-                          hasQuestionMark={false}
-                          xtraStyle="mb-3 font-semibold text-xs uppercase"
-                        />
-                        <CustomInput icon={icon} disabled defaultValue={text} />
+                    <div key={idx} className="w-full max-w-[20.3125rem]">
+                      <div className="mb-3">
+                        <label
+                          htmlFor={text}
+                          className="font-semibold text-xs uppercase text-dark-200"
+                        >
+                          Amount
+                        </label>
                       </div>
-                      <div className="w-full max-w-[20.3125rem]">
-                        <CustomText
-                          text="Amount"
-                          hasQuestionMark={false}
-                          xtraStyle="mb-3 font-semibold text-xs uppercase"
-                        />
-                        <CustomInput
-                          type="number"
-                          placeholder="0"
-                          name={text}
-                          value={coinValue[text]}
-                          onChange={handleOnCoinInputChange}
-                        />
+                      <CustomInput
+                        id={text}
+                        type="number"
+                        placeholder="0"
+                        name={text}
+                        value={coinValue[text]}
+                        onChange={handleOnCoinInputChange}
+                        postIcon={
+                          <span className="flex gap-x-3 items-center font-ubuntumono text-[0.8125rem] font-normal">
+                            <p>{text}</p> <>{icon}</>{' '}
+                          </span>
+                        }
+                      />
+                      <div className="flex gap-x-2 mt-4">
+                        {['$100', '$300', '$500', 'Max'].map((data, idx) => (
+                          <span
+                            key={idx}
+                            className="flex justify-center items-center px-2 h-[23px] text-center rounded-[15px] bg-light-200 text-blue-200 text-xs"
+                          >
+                            {data}
+                          </span>
+                        ))}
                       </div>
-                    </Fragment>
+                    </div>
                   ))}
                 </div>
               </div>

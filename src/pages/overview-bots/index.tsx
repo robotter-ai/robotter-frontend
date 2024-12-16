@@ -14,6 +14,7 @@ const OverviewBots: React.FC = () => {
     tabs,
     dateTabs,
     timeTabs,
+    timeBTabs,
     perfTabs,
     stratTabs,
     cryptoTabs,
@@ -33,6 +34,7 @@ const OverviewBots: React.FC = () => {
     query,
     dateQuery,
     timeQuery,
+    timeBQuery,
     perfQuery,
     stratQuery,
     cryptoQuery,
@@ -75,9 +77,9 @@ const OverviewBots: React.FC = () => {
         dateQuery={dateQuery}
         cryptoQuery={cryptoQuery}
         chartTypeQuery={chartTypeQuery}
-        timeQuery={timeQuery}
+        timeBQuery={timeBQuery}
         perfQuery={perfQuery}
-        timeTabs={timeTabs}
+        timeBTabs={timeBTabs}
         perfTabs={perfTabs}
         cryptoTabs={cryptoTabs}
         chartTypeTabsB={chartTypeTabsB}
