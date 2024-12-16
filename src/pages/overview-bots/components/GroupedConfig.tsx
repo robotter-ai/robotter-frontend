@@ -7,6 +7,7 @@ import ToggleButton from './ToggleButton';
 import RangeSlider from './RangeSlider';
 import CustomText from './CustomText';
 import NumberInput from './NumberInput';
+import CustomInput from '@components/ui/CustomInput';
 
 interface IGroupedConfigProps {
   config: IStrategiesConfigData;
@@ -86,19 +87,18 @@ const GroupedConfig = forwardRef<HTMLDivElement, IGroupedConfigProps>(
             {cfg.display_type === 'input' || cfg.display_type === 'slider' ? (
               typeof cfg.default === 'number' ? (
                 <div className="flex justify-between gap-x-4">
-                  <div className="flex items-center text-sm px-4 w-[6.1875rem] h-[2.25rem] rounded-[100px] bg-light-200 outline-2 outline outline-transparent border border-transparent text-blue-400 focus-within:outline-blue-300 focus-within:hover:border-transparent hover:border-blue-300/50">
+                  <div className="flex items-center text-sm px-4 w-[6.1875rem] h-[2.25rem] rounded-[10px] outline outline-1 outline-light-400 border-none text-dark-300 focus-within:outline-blue-300 focus-within:hover:outline-blue-300 hover:outline-blue-300/40">
                     <span>{cfg.is_percentage ? '+' : ''}</span>
                     <input
                       name={key}
                       className={`w-full ${
                         cfg.is_percentage ? 'text-center' : ''
-                      } bg-transparent disabled:cursor-not-allowed outline-none`}
+                      } bg-transparent disabled:cursor-not-allowed outline-none placeholder:text-blue-200`}
                       value={`${value[key]}`}
                       onChange={handleOnInputChange}
                     />
                     <span>{cfg.is_percentage ? '%' : ''}</span>
                   </div>
-
                   <div className="w-60 flex-1 mt-[-5px]">
                     <RangeSlider
                       name={key}
@@ -120,8 +120,7 @@ const GroupedConfig = forwardRef<HTMLDivElement, IGroupedConfigProps>(
                 cfg.default && cfg.default.toString().includes(',') ? (
                   <NumberInput data={cfg.default.toString()} />
                 ) : (
-                  <input
-                    className="bg-light-200 rounded-[22px] w-full h-[2.25rem] px-4 border text-sm border-transparent text-blue-400 focus:outline-blue-300 hover:border-blue-300/50 disabled:cursor-not-allowed"
+                  <CustomInput
                     name={key}
                     value={`${value[key]}`}
                     onChange={handleOnInputChange}

@@ -20,12 +20,13 @@ import {
   IStratTab,
   ITab,
   ITabs,
+  ITimeBTab,
   ITimeTab,
 } from '../hooks/useProfile';
 import Switcher from './Switcher';
 
 export interface IHeaderProps {
-  query: ITab | ITimeTab | IDateTab | IStratTab | IChatTab | IPerfTab;
+  query: ITab | ITimeTab | ITimeBTab | IDateTab | IStratTab | IChatTab | IPerfTab;
   tabs: ITabs[];
   searchParams: URLSearchParams;
   setSearchParams: SetURLSearchParams;

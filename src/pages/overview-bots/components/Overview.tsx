@@ -16,6 +16,7 @@ import {
   ITabs,
   ITimeTab,
   IChatTab,
+  ITimeBTab,
 } from '../hooks/useProfile';
 import Performance from './Performance';
 import CryptoStats from './CryptoStats';
@@ -24,15 +25,16 @@ import Switcher from './Switcher';
 import PnLChart from './PnLChart';
 import LineTab from './LineTab';
 import PnLineChart from './PnLineChart';
+import { truncateText } from '@utils/truncateText.util';
 
 interface IOverviewProps {
   dateTabs: IDateTabs[];
   dateQuery: string;
-  timeQuery: ITimeTab;
+  timeBQuery: ITimeBTab;
   chartTypeQuery: IChatTab;
   cryptoQuery: ICryptoTab;
   perfQuery: IPerfTab;
-  timeTabs: ITabs[];
+  timeBTabs: ITabs[];
   perfTabs: ITabs[];
   cryptoTabs: ITabs[];
   chartTypeTabsB: ITabs[];
@@ -47,14 +49,14 @@ interface IOverviewProps {
 
 const Overview: React.FC<IOverviewProps> = ({
   dateTabs,
-  timeTabs,
+  timeBTabs,
   perfTabs,
   cryptoTabs,
   dateQuery,
   cryptoQuery,
   chartTypeQuery,
   chartTypeTabsB,
-  timeQuery,
+  timeBQuery,
   perfQuery,
   statsData,
   statsDataOTN,
@@ -109,14 +111,18 @@ const Overview: React.FC<IOverviewProps> = ({
         id="overview_header"
         className="flex flex-col md:flex-row gap-y-3 md:gap-y-3 justify-between items-center mt-5"
       >
-        <h2 className="font-semibold text-2xl">
-          Portfolio:{' '}
-          {isEmpty ? (
-            <span className="text-states">$0 (0%)</span>
-          ) : (
-            <span className="text-green-100">$19 349 (+20%)</span>
-          )}
-        </h2>
+        <div>
+          <p className="text-dark-100 text-[0.625rem] mb-1">Overview</p>
+          <h2 className="font-semibold text-2xl">
+            Portfolio:{' '}
+            {isEmpty ? (
+              <span className="text-states">$0 (0%)</span>
+            ) : (
+              <span className="text-green-100">$19 349 (+20%)</span>
+            )}
+          </h2>
+        </div>
+
         <CustomBtn
           text="Create New Model"
           xtraStyles="max-w-[20.3125rem] w-[90%]"
@@ -125,22 +131,14 @@ const Overview: React.FC<IOverviewProps> = ({
         />
       </div>
 
-      <LineTab
-        keyQuery="date"
-        data={dateTabs}
-        query={dateQuery}
-        searchParams={searchParams}
-        setSearchParams={setSearchParams}
-      />
-
       <div className="flex flex-col xl:flex-row justify-between gap-x-4">
         <div id="left" className="w-full">
           <div className="overflow-x-auto lg:overflow-x-clip pb-2">
-            <CryptoStats data={cryptoStats} isEmpty={isEmpty} />
-
-            <div className="flex w-full h-[32px] overflow-hidden rounded-[8px] mt-4">
+            <div className="flex w-full h-[49px] overflow-hidden rounded-[8px] mt-4">
               {isEmpty ? (
-                <div className="h-full w-full bg-light-300"></div>
+                <div className="h-full w-full bg-light-250 flex justify-center items-center text-xs font-medium text-dark-200 uppercase">
+                  Portfolio
+                </div>
               ) : (
                 cryptoStats.map((data, i) => {
                   const total = cryptoStats.reduce(
@@ -152,12 +150,38 @@ const Overview: React.FC<IOverviewProps> = ({
                     <div
                       key={i}
                       style={{ background: data.color, width: `${length}%` }}
-                      className="block h-full"
-                    />
+                      className="h-full px-3 flex items-center"
+                    >
+                      <div>
+                        <p className="text-dark-200 text-xs font-medium uppercase">
+                          {`${
+                            data.percentage <= 5
+                              ? truncateText(data.tag, 3)
+                              : data.tag
+                          }`}
+                        </p>
+                        <p className="text-[0.8125rem] font-normal mt-[-2px] font-ubuntumono">{`${
+                          data.percentage <= 5
+                            ? truncateText(
+                                `$${data.amount} (${data.percentage}%)`,
+                                3
+                              )
+                            : `$${data.amount} (${data.percentage}%)`
+                        }`}</p>
+                      </div>
+                    </div>
                   );
                 })
               )}
             </div>
+
+            <LineTab
+              keyQuery="date"
+              data={dateTabs}
+              query={dateQuery}
+              searchParams={searchParams}
+              setSearchParams={setSearchParams}
+            />
 
             <div id="stats_table" className="flex gap-x-3 mt-5">
               <div className="flex flex-row md:flex-col lg:flex-row w-full gap-y-4 xl:gap-y-0 gap-x-3">
@@ -172,9 +196,8 @@ const Overview: React.FC<IOverviewProps> = ({
                   isEmpty={isEmpty}
                 />
                 <StatsTable
-                  title="Lock 450 OTN more to Save on FEES and COSTS"
+                  title="Costs"
                   statsData={statsDataOTN}
-                  showBtn
                   isEmpty={isEmpty}
                 />
               </div>
@@ -191,33 +214,33 @@ const Overview: React.FC<IOverviewProps> = ({
               )}
             </h2>
 
-            {isEmpty ? (
-              <div className='bg-light-300 w-[20.5625rem] h-[32px] rounded-[8px]'></div>
-            ) : (
-              <LineTab
-                keyQuery="crypto"
-                data={cryptoTabs}
-                query={cryptoQuery}
+            <div className="max-w-[9.8125rem] w-[60%] h-[1.9375rem]">
+              <Switcher
+                keyQuery="chart"
+                query={chartTypeQuery}
+                tabs={chartTypeTabsB}
                 searchParams={searchParams}
                 setSearchParams={setSearchParams}
               />
-            )}
+            </div>
 
             <div className="flex justify-between items-center mb-4 mt-6">
-              <div className="max-w-[9.8125rem] w-[60%] h-[1.9375rem]">
-                <Switcher
-                  keyQuery="chart"
-                  query={chartTypeQuery}
-                  tabs={chartTypeTabsB}
+              {isEmpty ? (
+                <div className="bg-light-250 w-[20.5625rem] h-[23px] rounded-[8px]"></div>
+              ) : (
+                <LineTab
+                  keyQuery="crypto"
+                  data={cryptoTabs}
+                  query={cryptoQuery}
                   searchParams={searchParams}
                   setSearchParams={setSearchParams}
                 />
-              </div>
-              <div className="max-w-[20.25rem] w-[80%] h-[1.9375rem]">
+              )}
+              <div className="max-w-[15.6875rem] w-[80%] h-[1.9375rem]">
                 <Switcher
-                  keyQuery="time"
-                  query={timeQuery}
-                  tabs={timeTabs}
+                  keyQuery="timeb"
+                  query={timeBQuery}
+                  tabs={timeBTabs}
                   searchParams={searchParams}
                   setSearchParams={setSearchParams}
                 />
@@ -225,7 +248,9 @@ const Overview: React.FC<IOverviewProps> = ({
             </div>
 
             {isEmpty ? (
-              <div className="w-full h-[359px] mt-3 rounded-[8px] bg-light-300" />
+              <div className="flex justify-center items-center w-full h-[395px] mt-3 rounded-[8px] bg-light-250 font-medium text-xs text-dark-200">
+                P&L CHART
+              </div>
             ) : (
               <div className="overflow-x-auto xl:overflow-x-clip ">
                 {getChartTypeQuery === 'pnl' && (

@@ -3,6 +3,9 @@ module.exports = {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
+      fontFamily: {
+        ubuntumono: ['Ubuntu Mono', 'sans-serif'],
+      },
       boxShadow: {
         custom: '0px 16px 32px 0px #16253533',
       },
@@ -24,10 +27,15 @@ module.exports = {
         'chart-200': '#1F609C',
         'chart-300': '#3AA8F0',
         'chart-400': '#2788B2',
+        'chart-500': '#FFDDD3',
+        'chart-600': '#D7CEE3',
+        'chart-700': '#D4E6FC',
+        'chart-800': '#F7D7E6',
         'green-100': '#218358',
         'red-100': '#CE2C31',
         'light-20': '#F6F8FB',
         'light-200': '#F1FAFD',
+        'light-250': '#F5F5F5',
         'dark-20': '#91989C',
         'dark-40': '#5C6569',
         'dark-100': '#84828E',
@@ -43,6 +51,7 @@ module.exports = {
         'text-dark': '#244141',
         'form-bg': '#F6FAFB',
         states: '#EFB621',
+        'yellow-200': '#F6E2AC',
         turkish: '#80FFED',
       },
     },

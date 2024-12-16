@@ -1,4 +1,5 @@
 import { createElement, ReactNode, useEffect, useState } from 'react';
+import { getDaysBtnDates } from '@utils/getDaysBtnDates.util';
 import { useSearchParams } from 'react-router-dom';
 import usePageTitle from '@shared/hooks/usePageTitle';
 import { useAppSelector } from '@shared/hooks/useStore';
@@ -14,6 +15,7 @@ import {
 
 export type ITab = 'overview' | 'datasets' | 'training' | 'bots' | 'tutorial';
 export type ITimeTab = 'minute' | 'hour' | 'day' | 'week' | 'month';
+export type ITimeBTab = 'hourly' | 'daily' | 'weekly';
 export type ICryptoTab = 'all' | 'big' | 'trade' | 'alpha' | 'moon';
 export type IDateTab = 'day' | 'week' | 'month' | 'time';
 export type IStratTab = 'strat' | 'hyper';
@@ -25,6 +27,7 @@ export interface ITabs {
   key:
     | ITab
     | ITimeTab
+    | ITimeBTab
     | IDateTab
     | ICryptoTab
     | IStratTab
@@ -62,6 +65,7 @@ export interface ICardBotData {
   name: string;
   rate: number;
   isPositive: boolean;
+  color?: string;
   pieChartData: ICryptoStats[];
   lineChartData: number[] | null;
   tableData: {
@@ -110,20 +114,16 @@ export interface IDepositInfo {
 
 export default () => {
   const { address } = useAppSelector((state) => state.auth);
+  const { coinValue, endDate, expenses, fee } = useAppSelector((state) => state.general);
   const [searchParams, setSearchParams] = useSearchParams();
   const { setTitle } = usePageTitle();
-
   const [search, setSearch] = useState('');
-
-  // const { data } = useGetUserInfoQuery({ address: session?.address });
-
-  // const user = data as IUserInfo;
-
   const query: ITab = (searchParams.get('tab') as ITab) || 'overview';
   const dateQuery = (searchParams.get('date') as IDateTab) || 'week';
   const cryptoQuery = (searchParams.get('crypto') as ICryptoTab) || 'all';
   const tradeDateQuery = (searchParams.get('trade_date') as IDateTab) || 'day';
   const timeQuery = (searchParams.get('time') as ITimeTab) || 'day';
+  const timeBQuery = (searchParams.get('timeb') as ITimeBTab) || 'daily';
   const perfQuery = (searchParams.get('perf') as IPerfTab) || 'best';
   const stratQuery = (searchParams.get('strat') as IStratTab) || 'strat';
   const resultStatQuery =
@@ -202,6 +202,12 @@ export default () => {
     { key: 'month', name: '1M', icon: null },
   ];
 
+  const timeBTabs: ITabs[] = [
+    { key: 'hourly', name: 'Hourly', icon: null },
+    { key: 'daily', name: 'Daily', icon: null },
+    { key: 'weekly', name: 'Weekly', icon: null },
+  ];
+
   const perfTabs: ITabs[] = [
     { key: 'best', name: 'Best Performance', icon: null },
     { key: 'worst', name: 'Worst Performance', icon: null },
@@ -234,34 +240,34 @@ export default () => {
     {
       amount: 9186,
       tag: 'Big Brain',
-      percentage: 20,
+      percentage: 47,
       value: null,
       isProfit: true,
-      color: '#3AA8F0',
+      color: '#FFDDD3',
     },
     {
       amount: 7036,
       tag: 'Trade Genius',
-      percentage: 11,
+      percentage: 36,
       value: null,
       isProfit: true,
-      color: '#1F609C',
+      color: '#D7CEE3',
     },
     {
       amount: 3127,
       tag: 'Alpha Trader',
-      percentage: 1,
+      percentage: 14,
       value: null,
       isProfit: false,
-      color: '#4AB6C4',
+      color: '#D4E6FC',
     },
     {
       amount: 550,
       tag: 'Moon Space',
-      percentage: 3,
+      percentage: 1,
       value: null,
       isProfit: false,
-      color: '#2788B2',
+      color: '#F7D7E6',
     },
   ];
 
@@ -360,22 +366,13 @@ export default () => {
         'Represents the total value of all assets traded by your bots during the selected period, providing insight into your trading activity.',
     },
     {
-      label: 'Successful',
-      value: '133',
+      label: 'Average profit',
+      value: '$15,63',
       chartData: [98, 40, 60, 38, 42, 46, 40, 90, 95, 50],
       progressValue: null,
       color: '#F44336',
       toolTipText:
         'The number of all executed buy and sell orders by your bots during the selected period, showing the overall trading activity.',
-    },
-    {
-      label: 'Failed',
-      value: '117',
-      chartData: [50, 60, 40, 49, 38, 34, 80, 76, 95, 100],
-      progressValue: null,
-      color: '#4CAF50',
-      toolTipText:
-        'The percentage of successful trades made by your bots, indicating how often their predictions were correct.',
     },
     {
       label: 'Total accuracy',
@@ -441,17 +438,8 @@ export default () => {
 
   const statsDataOTN: IStatsTableData[] = [
     {
-      label: 'OTN Balance',
-      value: '550',
-      chartData: null,
-      progressValue: 50,
-      color: '',
-      toolTipText:
-        "The amount of OTN (Robotter's native token) you hold. Staking OTN can reduce your trading fees and unlock additional rewards for increased profitability.",
-    },
-    {
       label: 'Compute costs',
-      value: '$150',
+      value: '$24',
       chartData: [98, 40, 60, 38, 42, 46, 40, 90, 95, 50],
       progressValue: null,
       color: '#F44336',
@@ -468,13 +456,21 @@ export default () => {
         'The average fee charged for placing limit orders that add liquidity to the market. Lower maker fees can reduce your overall trading costs.',
     },
     {
-      label: 'Av taker fee',
+      label: 'Av. taker fee',
       value: '3%',
       chartData: null,
       progressValue: 30,
       color: '',
       toolTipText:
         'The average fee charged for executing market orders that remove liquidity from the market. Higher taker fees can impact your overall trading profitability.',
+    },
+    {
+      label: 'Fees paid',
+      value: '$32',
+      chartData: [50, 60, 40, 49, 38, 34, 80, 76, 95, 100],
+      progressValue: null,
+      color: '#4CAF50',
+      toolTipText: null,
     },
   ];
 
@@ -518,12 +514,13 @@ export default () => {
       name: 'Big Brain',
       rate: 1837,
       isPositive: true,
+      color: '#FACFC4',
       pieChartData: [
         {
           amount: 65,
           tag: 'profit',
           percentage: 65,
-          color: '#218358',
+          color: '#A3E5C8',
           isProfit: true,
           value: null,
         },
@@ -531,7 +528,7 @@ export default () => {
           amount: 35,
           tag: 'loss',
           percentage: 35,
-          color: '#CE2C31',
+          color: '#FFAFB2',
           isProfit: false,
           value: null,
         },
@@ -539,20 +536,20 @@ export default () => {
       lineChartData: [50, 60, 40, 49, 38, 34, 80, 76, 95, 100],
       tableData: [
         {
-          labelA: [210, 'APR'],
-          labelB: [42.6, 'SOL'],
+          labelA: [`$210`, 'Portfolio'],
+          labelB: ['42.6%', 'Max drawdown'],
           percentage: 11,
           isProfit: true,
         },
         {
-          labelA: [2.81, 'Sharpe ratio'],
-          labelB: [0.13, 'BTC'],
+          labelA: [`187%`, 'APY'],
+          labelB: [0.13, 'Sharpe ratio'],
           percentage: 10,
           isProfit: true,
         },
         {
           labelA: [14, 'Trades'],
-          labelB: [550, 'OTN'],
+          labelB: [`2024-12-29`, 'End date'],
           percentage: 9,
           isProfit: true,
         },
@@ -562,12 +559,13 @@ export default () => {
       name: 'Trade Genius',
       rate: 773,
       isPositive: true,
+      color: '#D7CEE3',
       pieChartData: [
         {
           amount: 59,
           tag: 'profit',
           percentage: 59,
-          color: '#218358',
+          color: '#A3E5C8',
           isProfit: true,
           value: null,
         },
@@ -575,7 +573,7 @@ export default () => {
           amount: 41,
           tag: 'loss',
           percentage: 41,
-          color: '#CE2C31',
+          color: '#FFAFB2',
           isProfit: false,
           value: null,
         },
@@ -583,20 +581,20 @@ export default () => {
       lineChartData: [50, 60, 40, 49, 38, 34, 80, 76, 95, 100],
       tableData: [
         {
-          labelA: [187, 'APR'],
-          labelB: [2.35, 'SOL'],
+          labelA: [`$187`, 'Portfolio'],
+          labelB: [`45%`, 'Max drawdown'],
           percentage: 16,
           isProfit: true,
         },
         {
-          labelA: [2.01, 'Sharpe ratio'],
-          labelB: [0.0034, 'BTC'],
+          labelA: [`164%`, 'APY'],
+          labelB: [0.0034, 'Sharpe ratio'],
           percentage: 14,
           isProfit: true,
         },
         {
           labelA: [36, 'Trades'],
-          labelB: [83, 'OTN'],
+          labelB: [`2024-12-29`, 'End date'],
           percentage: 2,
           isProfit: true,
         },
@@ -606,12 +604,13 @@ export default () => {
       name: 'Alpha Trader',
       rate: 31,
       isPositive: false,
+      color: '#D4E6FC',
       pieChartData: [
         {
           amount: 49,
           tag: 'profit',
           percentage: 49,
-          color: '#218358',
+          color: '#A3E5C8',
           isProfit: true,
           value: null,
         },
@@ -619,7 +618,7 @@ export default () => {
           amount: 51,
           tag: 'loss',
           percentage: 51,
-          color: '#CE2C31',
+          color: '#FFAFB2',
           isProfit: true,
           value: null,
         },
@@ -627,20 +626,20 @@ export default () => {
       lineChartData: [90, 85, 80, 70, 60, 65, 75, 76, 95, 80],
       tableData: [
         {
-          labelA: [165, 'APR'],
-          labelB: [3.68, 'SOL'],
+          labelA: [`$165`, 'Portfolio'],
+          labelB: [`36%`, 'Max drawdown'],
           percentage: 1,
           isProfit: true,
         },
         {
-          labelA: [1.75, 'Sharpe ratio'],
-          labelB: [0.0001, 'BTC'],
+          labelA: [`210%`, 'APY'],
+          labelB: [0.0001, 'Sharpe ratio'],
           percentage: 8,
           isProfit: false,
         },
         {
           labelA: [120, 'Trades'],
-          labelB: [89, 'OTN'],
+          labelB: [`2024-12-29`, 'End date'],
           percentage: 4,
           isProfit: true,
         },
@@ -650,12 +649,13 @@ export default () => {
       name: 'Moon Space',
       rate: 62,
       isPositive: false,
+      color: '#F7D7E6',
       pieChartData: [
         {
           amount: 49,
           tag: 'profit',
           percentage: 49,
-          color: '#218358',
+          color: '#A3E5C8',
           isProfit: true,
           value: null,
         },
@@ -663,7 +663,7 @@ export default () => {
           amount: 51,
           tag: 'loss',
           percentage: 51,
-          color: '#CE2C31',
+          color: '#FFAFB2',
           isProfit: true,
           value: null,
         },
@@ -671,20 +671,20 @@ export default () => {
       lineChartData: [90, 85, 80, 70, 60, 65, 75, 76, 95, 80],
       tableData: [
         {
-          labelA: [102, 'APR'],
-          labelB: [0.0003, 'ETH'],
+          labelA: [`$102`, 'Portfolio'],
+          labelB: [`47%`, 'Max drawdown'],
           percentage: 2,
           isProfit: true,
         },
         {
-          labelA: [2.43, 'Sharpe ratio'],
-          labelB: [161, 'JUP'],
+          labelA: [`164%`, 'APY'],
+          labelB: [161, 'Sharpe ratio'],
           percentage: 7,
           isProfit: false,
         },
         {
           labelA: [6, 'Trades'],
-          labelB: [258, 'DRIFT'],
+          labelB: [`2024-12-29`, 'End date'],
           percentage: 5,
           isProfit: false,
         },
@@ -702,7 +702,7 @@ export default () => {
           amount: 68,
           tag: 'profit',
           percentage: 68,
-          color: '#218358',
+          color: '#A3E5C8',
           isProfit: true,
           value: null,
         },
@@ -710,7 +710,7 @@ export default () => {
           amount: 32,
           tag: 'loss',
           percentage: 32,
-          color: '#CE2C31',
+          color: '#FFAFB2',
           isProfit: false,
           value: null,
         },
@@ -746,7 +746,7 @@ export default () => {
           amount: 65,
           tag: 'profit',
           percentage: 65,
-          color: '#218358',
+          color: '#A3E5C8',
           isProfit: true,
           value: null,
         },
@@ -754,7 +754,7 @@ export default () => {
           amount: 35,
           tag: 'loss',
           percentage: 35,
-          color: '#CE2C31',
+          color: '#FFAFB2',
           isProfit: false,
           value: null,
         },
@@ -790,7 +790,7 @@ export default () => {
           amount: 48,
           tag: 'profit',
           percentage: 48,
-          color: '#218358',
+          color: '#A3E5C8',
           isProfit: true,
           value: null,
         },
@@ -798,7 +798,7 @@ export default () => {
           amount: 52,
           tag: 'loss',
           percentage: 52,
-          color: '#CE2C31',
+          color: '#FFAFB2',
           isProfit: false,
           value: null,
         },
@@ -834,7 +834,7 @@ export default () => {
           amount: 46,
           tag: 'profit',
           percentage: 46,
-          color: '#218358',
+          color: '#A3E5C8',
           isProfit: true,
           value: null,
         },
@@ -842,7 +842,7 @@ export default () => {
           amount: 54,
           tag: 'loss',
           percentage: 54,
-          color: '#CE2C31',
+          color: '#FFAFB2',
           isProfit: false,
           value: null,
         },
@@ -977,13 +977,15 @@ export default () => {
     ['Timespan', '2024-05-01 / 2024-05-31'],
   ];
 
+  const numOfTradeDays = getDaysBtnDates(endDate ? endDate : new Date());
+
   const depositInfo: IDepositInfo[] = [
     { l: 'Market', r: 'SOL / USDC', icon: null },
-    { l: 'Number of trading days', r: '0', icon: null },
-    { l: 'Compute expenses', r: '$0', icon: null },
-    { l: 'Solana fees', r: '$0', icon: null },
-    { l: 'SOL', r: '0', icon: createElement(SolanaLogo) },
-    { l: 'USDC', r: '0', icon: createElement(USDCLogo) },
+    { l: 'Number of trading days', r: `${numOfTradeDays}`, icon: null },
+    { l: 'Compute expenses', r: `$${expenses}`, icon: null },
+    { l: 'Solana fees', r: `$${fee}`, icon: null },
+    { l: 'SOL', r: `${coinValue.SOL}`, icon: createElement(SolanaLogo) },
+    { l: 'USDC', r: `${coinValue.USDC}`, icon: createElement(USDCLogo) },
     { l: 'Total', r: '$0', icon: null },
   ];
 
@@ -995,6 +997,7 @@ export default () => {
     tabs,
     dateTabs,
     timeTabs,
+    timeBTabs,
     cryptoTabs,
     perfTabs,
     stratTabs,
@@ -1019,6 +1022,7 @@ export default () => {
     // user,
     query,
     dateQuery,
+    timeBQuery,
     timeQuery,
     perfQuery,
     cryptoQuery,

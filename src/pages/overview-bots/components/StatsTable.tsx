@@ -1,5 +1,5 @@
-import CustomBtn from '@components/ui/CustomBtn';
 import { IStatsTableData } from '../hooks/useProfile';
+import CustomBtn from '@components/ui/CustomBtn';
 import MiniLineChart from './MiniLineChart';
 import CustomText from './CustomText';
 
@@ -51,6 +51,7 @@ const StatsTable: React.FC<IStatsTableProps> = ({
                 text={stat.label}
                 hasQuestionMark={hasQuestionMark}
                 toolTipText={stat.toolTipText}
+                isEmpty={isEmpty}
               />
             </div>
 
@@ -61,7 +62,7 @@ const StatsTable: React.FC<IStatsTableProps> = ({
               <div>
                 {/* Chart */}
                 {isEmpty && !stat.progressValue ? (
-                  <div className="w-[6.25rem] h-[2px] bg-states" />
+                  <div className="w-[6.25rem] h-[2px] bg-yellow-200" />
                 ) : (
                   stat.chartData && (
                     <div className="w-[5.7rem] h-[1.4375rem]">
