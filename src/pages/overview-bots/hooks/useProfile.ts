@@ -957,6 +957,7 @@ export default () => {
 
   const bigResultTable = [
     ['Model Name', 'SOL Big Brain'],
+    ['Market', 'SOL—USDC'],
     ['Test P&L', '+$1100 (11%)'],
     ['Trading Accuracy', '63%'],
     ['Max. drawdown', '53%'],
@@ -968,6 +969,7 @@ export default () => {
 
   const bigStatTable = [
     ['Model Name', 'SOL Big Brain'],
+    ['Market', 'SOL—USDC'],
     ['Exchange', 'Mango Markets'],
     ['Trading Strategy / Normalized value', 'BarUpDown / 0.5'],
     ['Market trend', 'Bullish / 67%'],
@@ -980,7 +982,7 @@ export default () => {
   const numOfTradeDays = getDaysBtnDates(endDate ? endDate : new Date());
 
   const depositInfo: IDepositInfo[] = [
-    { l: 'Market', r: 'SOL / USDC', icon: null },
+    { l: 'Market', r: 'SOL—USDC', icon: null },
     { l: 'Number of trading days', r: `${numOfTradeDays}`, icon: null },
     { l: 'Compute expenses', r: `$${expenses}`, icon: null },
     { l: 'Solana fees', r: `$${fee}`, icon: null },
