@@ -2,7 +2,7 @@ import { countConfigsPerGroup } from '../../..//utils/countConfigsPerGroup.util'
 import { IStrategiesConfigData } from '../../../utils/strategyConfigData';
 import { formatText } from '../../../utils/formatText.util';
 import { ChangeEvent, forwardRef } from 'react';
-import CustomDropdown from './CustomDropdown';
+import CustomDropdown, { Option } from './CustomDropdown';
 import ToggleButton from './ToggleButton';
 import RangeSlider from './RangeSlider';
 import CustomText from './CustomText';
@@ -15,6 +15,7 @@ interface IGroupedConfigProps {
   hasOtherGroup?: boolean;
   uniqueGroups: string[];
   value: { [key: string]: number | string | boolean };
+  tradingPairOpts: Option[],
   handleOnInputChange: (evt: ChangeEvent<HTMLInputElement>) => void;
   handleOnRangeChange: (evt: ChangeEvent<HTMLInputElement>) => void;
   handleOnToggle: (isOn: boolean, key: string) => void;
@@ -28,6 +29,7 @@ const GroupedConfig = forwardRef<HTMLDivElement, IGroupedConfigProps>(
       value,
       hasOtherGroup,
       uniqueGroups,
+      tradingPairOpts,
       handleOnInputChange,
       handleOnRangeChange,
       handleOnToggle,
@@ -119,6 +121,12 @@ const GroupedConfig = forwardRef<HTMLDivElement, IGroupedConfigProps>(
               ) : typeof cfg.default === 'string' || cfg.type === 'str' ? (
                 cfg.default && cfg.default.toString().includes(',') ? (
                   <NumberInput data={cfg.default.toString()} />
+                ) : formatText(key) === 'trading pair' ? (
+                  <CustomDropdown
+                    options={tradingPairOpts}
+                    onSelect={() => {}}
+                    isSearchable
+                  />
                 ) : (
                   <CustomInput
                     name={key}

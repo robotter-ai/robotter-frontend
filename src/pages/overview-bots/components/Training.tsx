@@ -134,6 +134,14 @@ const Training: React.FC<ITrainingProps> = ({
     { label: 'Uniswap', value: '7' },
   ];
 
+  const tradingPairOpts = [
+    { label: 'SOL—USDC', value: '1', tags: ['Largest Volume', 'Binance'] },
+    { label: 'SOL—USDC', value: '2', tags: ['Most frequent', 'Mango'] },
+    { label: 'SOL—USDT', value: '3', tags: ['Uniswap'] },
+    { label: 'SOL—JUP', value: '4', tags: ['Binance'] },
+    { label: 'SOL—USDT', value: '5', tags: ['Cube'] },
+  ];
+
   const numOfTradeDays = getDaysBtnDates(endDate ? endDate : new Date());
 
   const toggleAdancedSettingsOpen = () =>
@@ -258,7 +266,7 @@ const Training: React.FC<ITrainingProps> = ({
         />
       </div>
       {currentStep == 1 || currentStep == 2 ? (
-        <div className="flex items-center justify-between mt-8 mb-6 flex-wrap gap-y-4 md:gap-y-0">
+        <div className="flex items-center justify-between mt-8 mb-2 flex-wrap gap-y-4 md:gap-y-0">
           <h2 className="font-semibold text-2xl text-dark-300">
             {`Backtest ${
               currentStep === 1
@@ -284,20 +292,16 @@ const Training: React.FC<ITrainingProps> = ({
         className="flex flex-col lg:flex-row justify-between gap-y-8 lg:gap-y-0 lg:gap-x-4"
       >
         <div id="left" className="w-full">
-          {currentStep == 1 || currentStep == 2 ? (
-            <div>
-              <p className="uppercase text-xs font-semibold text-dark-200 mb-5">
-                {currentStep == 1
-                  ? 'Adjust settings for each trading pair separately'
-                  : 'Click on Trading Pair to view the Results of the backtest'}
-              </p>
-              <ButtonList btnData={solData} getTradePair={getTradePair} />
-            </div>
-          ) : null}
-
           {currentStep == 1 ? (
             <div id="sliders_n_dropdowns" className="mt-6">
               <div className="grid grid-cols-2 gap-x-5 gap-y-6 mb-6">
+                {currentStep == 1 || currentStep == 2 ? (
+                  <div className="flex justify-between items-center py-3 border-y border-light-300">
+                    <p className="text-sm text-dark-200 ">Model name</p>
+                    <p className="text-sm text-dark-300">Big Brain</p>
+                  </div>
+                ) : null}
+                <div />
                 <div id="COL 1" className="col-span-2 md:col-auto">
                   <CustomText
                     text="Exchange"
@@ -327,6 +331,7 @@ const Training: React.FC<ITrainingProps> = ({
                   config={config}
                   cfgName={cfgName}
                   value={value}
+                  tradingPairOpts={tradingPairOpts}
                   handleOnInputChange={handleOnInputChange}
                   handleOnRangeChange={handleOnRangeChange}
                   handleOnToggle={handleOnToggle}
@@ -376,9 +381,9 @@ const Training: React.FC<ITrainingProps> = ({
                     <p
                       className={`text-right text-dark-300 ${
                         getReStatQuery === 'result'
-                          ? i === 1 || i === 2
+                          ? i === 2 || i === 3
                             ? 'text-green-100'
-                            : i === 3
+                            : i === 4
                             ? 'text-red-100'
                             : ''
                           : ''
@@ -561,6 +566,7 @@ const Training: React.FC<ITrainingProps> = ({
                 config={config}
                 cfgName={cfgName}
                 value={value}
+                tradingPairOpts={tradingPairOpts}
                 handleOnInputChange={handleOnInputChange}
                 handleOnRangeChange={handleOnRangeChange}
                 handleOnToggle={handleOnToggle}

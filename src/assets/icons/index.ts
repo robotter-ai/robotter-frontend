@@ -16,6 +16,7 @@ import { ReactComponent as FolderIcon } from '@assets/icons/folder.svg';
 import { ReactComponent as BellIcon } from '@assets/icons/bell.svg';
 import { ReactComponent as ExportIcon } from '@assets/icons/export.svg';
 import { ReactComponent as SearchIcon } from '@assets/icons/search.svg';
+import { ReactComponent as Search24Icon } from '@assets/icons/Search24.svg';
 import { ReactComponent as AttachIcon } from '@assets/icons/attach.svg';
 import { ReactComponent as EditIcon } from '@assets/icons/edit.svg';
 import { ReactComponent as HomeIcon } from '@assets/icons/home.svg';
@@ -78,6 +79,7 @@ export {
   BellIcon,
   ExportIcon,
   SearchIcon,
+  Search24Icon,
   AttachIcon,
   EditIcon,
   HomeIcon,
