@@ -11,6 +11,7 @@ export interface Option {
   label: string;
   value: string;
   tags?: string[];
+  logo?: JSX.Element;
 }
 
 interface ICustomDropdownProps {
@@ -178,11 +179,18 @@ const CustomDropdown: React.FC<ICustomDropdownProps> = ({
               onMouseLeave={() => setHoveredIndex(null)}
             >
               <>{option.label}</>
-              {option.tags && (
-                <span className="flex gap-x-2 items-center">
-                  {option.tags.map((tag, idx) => tagSpan(tag, idx))}
-                </span>
-              )}
+              <span className="flex gap-x-2 items-center">
+                {option.tags && (
+                  <span className="flex gap-x-2 items-center">
+                    {option.tags.map((tag, idx) => tagSpan(tag, idx))}
+                  </span>
+                )}
+                {option.logo && (
+                  <span className="bg-white w-4 h-4 p-[0.1rem] rounded-[4px] flex justify-center items-center">
+                    {option.logo}
+                  </span>
+                )}
+              </span>
             </div>
           ))}
         </div>

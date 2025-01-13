@@ -59,6 +59,9 @@ import { ReactComponent as SolanaLogo } from '@assets/icons/Solana.svg';
 import { ReactComponent as SolflareLogo } from '@assets/icons/Solflare.svg';
 import { ReactComponent as USDCLogo } from '@assets/icons/USDC.svg';
 import { ReactComponent as USDTLogo } from '@assets/icons/USDT.svg';
+import { ReactComponent as CubeLogo } from '@assets/icons/cube.svg';
+import { ReactComponent as BinanceLogo } from '@assets/icons/binance.svg';
+import { ReactComponent as UniswapLogo } from '@assets/icons/Uniswap.svg';
 
 export {
   AlarmClockIcon,
@@ -122,4 +125,7 @@ export {
   SolflareLogo,
   USDCLogo,
   USDTLogo,
+  BinanceLogo,
+  CubeLogo,
+  UniswapLogo
 };

@@ -1,13 +1,13 @@
 import { countConfigsPerGroup } from '../../..//utils/countConfigsPerGroup.util';
 import { IStrategiesConfigData } from '../../../utils/strategyConfigData';
 import { formatText } from '../../../utils/formatText.util';
-import { ChangeEvent, forwardRef } from 'react';
 import CustomDropdown, { Option } from './CustomDropdown';
+import CustomInput from '@components/ui/CustomInput';
+import { ChangeEvent, forwardRef } from 'react';
 import ToggleButton from './ToggleButton';
 import RangeSlider from './RangeSlider';
-import CustomText from './CustomText';
 import NumberInput from './NumberInput';
-import CustomInput from '@components/ui/CustomInput';
+import CustomText from './CustomText';
 
 interface IGroupedConfigProps {
   config: IStrategiesConfigData;

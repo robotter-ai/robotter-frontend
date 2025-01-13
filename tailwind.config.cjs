@@ -4,6 +4,7 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
+        inter: ['Inter'],
         ubuntumono: ['Ubuntu Mono', 'sans-serif'],
       },
       boxShadow: {

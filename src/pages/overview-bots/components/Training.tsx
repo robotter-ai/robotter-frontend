@@ -19,8 +19,11 @@ import Pagination from './Pagination';
 import {
   ArrowDown2Icon,
   ArrowUp2Icon,
+  BinanceLogo,
+  CubeLogo,
   MangoLogo,
   SolanaLogo,
+  UniswapLogo,
   USDCLogo,
 } from '@assets/icons';
 import React, {
@@ -135,11 +138,11 @@ const Training: React.FC<ITrainingProps> = ({
   ];
 
   const tradingPairOpts = [
-    { label: 'SOL—USDC', value: '1', tags: ['Largest Volume', 'Binance'] },
-    { label: 'SOL—USDC', value: '2', tags: ['Most frequent', 'Mango'] },
-    { label: 'SOL—USDT', value: '3', tags: ['Uniswap'] },
-    { label: 'SOL—JUP', value: '4', tags: ['Binance'] },
-    { label: 'SOL—USDT', value: '5', tags: ['Cube'] },
+    { label: 'SOL—USDC', value: '1', tags: ['Largest Volume'], logo: <BinanceLogo /> },
+    { label: 'SOL—USDC', value: '2', tags: ['Most frequent'], logo: <MangoLogo /> },
+    { label: 'SOL—USDT', value: '3', tags: undefined, logo: <UniswapLogo /> },
+    { label: 'SOL—JUP', value: '4', tags: undefined, logo: <BinanceLogo /> },
+    { label: 'SOL—USDT', value: '5', tags: undefined, logo: <CubeLogo /> },
   ];
 
   const numOfTradeDays = getDaysBtnDates(endDate ? endDate : new Date());
@@ -467,7 +470,7 @@ const Training: React.FC<ITrainingProps> = ({
                           </span>
                         }
                       />
-                      <div className="flex gap-x-2 mt-4">
+                      <div className="flex gap-x-2 mt-4 uppercase">
                         {['$100', '$300', '$500', 'Max'].map((data, idx) => (
                           <span
                             key={idx}
@@ -477,6 +480,7 @@ const Training: React.FC<ITrainingProps> = ({
                           </span>
                         ))}
                       </div>
+                      <p className='text-dark-200 mt-2 text-[0.625rem]'>of connected wallet balance</p>
                     </div>
                   ))}
                 </div>
@@ -501,11 +505,11 @@ const Training: React.FC<ITrainingProps> = ({
                         {l}
                       </div>
                       <div
-                        className={`flex items-center justify-end gap-x-2 font-normal text-sm text-dark-300 text-right ${
+                        className={`flex items-center justify-end gap-x-2 font-normal font-ubuntumono text-sm text-dark-300 text-right ${
                           i == 0 ? 'border-t' : 'border-y'
                         } p-[0.5rem] border-white ${
                           depositInfo.length === i + 1
-                            ? 'text-base font-medium'
+                            ? 'text-base font-medium font-inter'
                             : ''
                         }`}
                       >
