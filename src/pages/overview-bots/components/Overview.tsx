@@ -71,7 +71,6 @@ const Overview: React.FC<IOverviewProps> = ({
   const { address } = useAppSelector((state) => state.auth);
   const { isOpen, handleOpen, handleClose } = useModal();
   const getChartTypeQuery = searchParams.get('chart') || 'pnl';
-  const navigate = useNavigate();
 
   const handleCreateNewModel = useCallback(async () => {
     if (!address) {
@@ -81,11 +80,11 @@ const Overview: React.FC<IOverviewProps> = ({
     }
 
     try {
-      await createInstance({
-        strategy_name: 'test',
-        strategy_parameters: {},
-        market: 'string',
-      }).unwrap();
+      // await createInstance({
+      //   strategy_name: 'test',
+      //   strategy_parameters: {},
+      //   market: 'string',
+      // }).unwrap();
       setSearchParams({ tab: 'training' });
     } catch (e) {
       console.error('Failed to create new model', e);

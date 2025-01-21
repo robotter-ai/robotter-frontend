@@ -35,15 +35,25 @@ const Performance: React.FC<IPerformanceProps> = ({
 
       {/* CardBot */}
       <div className="mt-2 w-full gap-x-3 overflow-x-auto flex lt:flex-col flex-row xl:flex-col lt:items-center">
-        {cardBotData.map((item, idx) => (
+        {isEmpty ? (
           <CardBot
             isEmpty={isEmpty}
-            key={idx}
-            cardBotData={item}
+            key={0}
+            cardBotData={cardBotData[0]}
             xtraStyle="lg:flex-auto flex-none"
             showSideColor
           />
-        ))}
+        ) : (
+          cardBotData.map((item, idx) => (
+            <CardBot
+              isEmpty={isEmpty}
+              key={idx}
+              cardBotData={item}
+              xtraStyle="lg:flex-auto flex-none"
+              showSideColor
+            />
+          ))
+        )}
       </div>
 
       {!isEmpty && (

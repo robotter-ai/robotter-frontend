@@ -55,10 +55,7 @@ const StatsTable: React.FC<IStatsTableProps> = ({
               />
             </div>
 
-            <div
-              id="COL 2"
-              className="flex justify-between items-center"
-            >
+            <div id="COL 2" className="flex justify-between items-center">
               <div>
                 {/* Chart */}
                 {isEmpty && !stat.progressValue ? (
@@ -75,11 +72,14 @@ const StatsTable: React.FC<IStatsTableProps> = ({
                 )}
                 {/* Progress Bar */}
                 {stat.progressValue && (
-                  <div className="w-[5.7rem] h-[0.479375rem] bg-blue-100 rounded-[34px]">
+                  <div
+                    className="w-[5.7rem] h-[0.479375rem] rounded-[34px]"
+                    style={{ background: stat.progressValueColor ? stat.progressValueColor[1] : '#e6f4fe' }}    
+                  >
                     {!isEmpty && (
                       <span
-                        style={{ width: `${stat.progressValue}%` }}
-                        className="block h-full bg-blue-200 rounded-[34px]"
+                        style={{ width: `${stat.progressValue}%`, background: stat.progressValueColor ? stat.progressValueColor[0] : '#60b3d7' }}
+                        className="block h-full rounded-[34px]"
                       />
                     )}
                   </div>

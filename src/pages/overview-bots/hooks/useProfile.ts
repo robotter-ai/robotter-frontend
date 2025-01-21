@@ -43,6 +43,7 @@ export interface IStatsTableData {
   value: string;
   chartData: null | number[];
   progressValue: null | number;
+  progressValueColor: string[] | null;
   color: string | null;
   toolTipText: string | null;
 }
@@ -114,7 +115,9 @@ export interface IDepositInfo {
 
 export default () => {
   const { address } = useAppSelector((state) => state.auth);
-  const { coinValue, endDate, expenses, fee } = useAppSelector((state) => state.general);
+  const { coinValue, endDate, expenses, fee } = useAppSelector(
+    (state) => state.general
+  );
   const [searchParams, setSearchParams] = useSearchParams();
   const { setTitle } = usePageTitle();
   const [search, setSearch] = useState('');
@@ -304,6 +307,7 @@ export default () => {
       value: '+$3909 (20%)',
       chartData: [50, 60, 40, 49, 38, 34, 80, 76, 95, 100],
       progressValue: null,
+      progressValueColor: null,
       color: '#4CAF50',
       toolTipText:
         'Shows the net gain or loss from your trades over a selected time period, helping you track performance',
@@ -313,6 +317,7 @@ export default () => {
       value: '-$469',
       chartData: [50, 60, 40, 49, 38, 34, 80, 76, 95, 100],
       progressValue: null,
+      progressValueColor: null,
       color: '#4CAF50',
       toolTipText:
         'Represents the total value of all assets traded by your bots during the selected period, providing insight into your trading activity.',
@@ -322,6 +327,7 @@ export default () => {
       value: '59.36%',
       chartData: [98, 40, 60, 38, 42, 46, 40, 90, 95, 50],
       progressValue: null,
+      progressValueColor: null,
       color: '#F44336',
       toolTipText:
         'The number of all executed buy and sell orders by your bots during the selected period, showing the overall trading activity.',
@@ -331,6 +337,7 @@ export default () => {
       value: '200%',
       chartData: [50, 60, 40, 49, 38, 34, 80, 76, 95, 100],
       progressValue: null,
+      progressValueColor: null,
       color: '#4CAF50',
       toolTipText:
         'The projected annual return on your trading strategies, expressed as a percentage, based on current performance and compounding',
@@ -340,6 +347,7 @@ export default () => {
       value: '2.52',
       chartData: [50, 60, 40, 49, 38, 34, 80, 76, 95, 100],
       progressValue: null,
+      progressValueColor: null,
       color: '#4CAF50',
       toolTipText:
         'The percentage of successful trades made by your bots, indicating how often their predictions were correct.',
@@ -352,6 +360,7 @@ export default () => {
       value: '$36 367',
       chartData: [50, 60, 40, 49, 38, 34, 80, 76, 95, 100],
       progressValue: null,
+      progressValueColor: null,
       color: '#4CAF50',
       toolTipText:
         'Shows the net gain or loss from your trades over a selected time period, helping you track performance',
@@ -361,6 +370,7 @@ export default () => {
       value: '250',
       chartData: [50, 60, 40, 49, 38, 34, 80, 76, 95, 100],
       progressValue: null,
+      progressValueColor: null,
       color: '#4CAF50',
       toolTipText:
         'Represents the total value of all assets traded by your bots during the selected period, providing insight into your trading activity.',
@@ -370,6 +380,7 @@ export default () => {
       value: '$15,63',
       chartData: [98, 40, 60, 38, 42, 46, 40, 90, 95, 50],
       progressValue: null,
+      progressValueColor: null,
       color: '#F44336',
       toolTipText:
         'The number of all executed buy and sell orders by your bots during the selected period, showing the overall trading activity.',
@@ -377,8 +388,9 @@ export default () => {
     {
       label: 'Total accuracy',
       value: '53%',
-      chartData: [50, 60, 40, 49, 38, 34, 80, 76, 95, 100],
-      progressValue: null,
+      chartData: null,
+      progressValue: 53,
+      progressValueColor: ['#A3E5C8', '#FFAFB2'],
       color: '#4CAF50',
       toolTipText:
         'The projected annual return on your trading strategies, expressed as a percentage, based on current performance and compounding',
@@ -391,6 +403,7 @@ export default () => {
       value: '-$20',
       chartData: [50, 60, 40, 49, 38, 34, 80, 76, 95, 100],
       progressValue: null,
+      progressValueColor: null,
       color: '#F44336',
       toolTipText: null,
     },
@@ -399,6 +412,7 @@ export default () => {
       value: '$9186',
       chartData: [50, 60, 40, 49, 38, 34, 80, 76, 95, 100],
       progressValue: null,
+      progressValueColor: null,
       color: '#4CAF50',
       toolTipText: null,
     },
@@ -407,6 +421,7 @@ export default () => {
       value: '$16532',
       chartData: [98, 40, 60, 38, 42, 46, 40, 90, 95, 50],
       progressValue: null,
+      progressValueColor: null,
       color: '#4CAF50',
       toolTipText: null,
     },
@@ -415,6 +430,7 @@ export default () => {
       value: '14',
       chartData: [50, 60, 40, 49, 38, 34, 80, 76, 95, 100],
       progressValue: null,
+      progressValueColor: null,
       color: '#F44336',
       toolTipText: null,
     },
@@ -423,6 +439,7 @@ export default () => {
       value: '210%',
       chartData: null,
       progressValue: null,
+      progressValueColor: null,
       color: null,
       toolTipText: null,
     },
@@ -431,6 +448,7 @@ export default () => {
       value: '2.81',
       chartData: null,
       progressValue: null,
+      progressValueColor: null,
       color: null,
       toolTipText: null,
     },
@@ -442,6 +460,7 @@ export default () => {
       value: '$24',
       chartData: [98, 40, 60, 38, 42, 46, 40, 90, 95, 50],
       progressValue: null,
+      progressValueColor: null,
       color: '#F44336',
       toolTipText:
         'The estimated cost for running your trading bots, including data processing and computational resources, billed monthly',
@@ -451,6 +470,7 @@ export default () => {
       value: '2%',
       chartData: null,
       progressValue: 20,
+      progressValueColor: ['#60B3D7', '#E6F4FE'],
       color: '',
       toolTipText:
         'The average fee charged for placing limit orders that add liquidity to the market. Lower maker fees can reduce your overall trading costs.',
@@ -460,6 +480,7 @@ export default () => {
       value: '3%',
       chartData: null,
       progressValue: 30,
+      progressValueColor: ['#60B3D7', '#E6F4FE'],
       color: '',
       toolTipText:
         'The average fee charged for executing market orders that remove liquidity from the market. Higher taker fees can impact your overall trading profitability.',
@@ -469,6 +490,7 @@ export default () => {
       value: '$32',
       chartData: [50, 60, 40, 49, 38, 34, 80, 76, 95, 100],
       progressValue: null,
+      progressValueColor: null,
       color: '#4CAF50',
       toolTipText: null,
     },
@@ -480,6 +502,7 @@ export default () => {
       value: '550',
       chartData: null,
       progressValue: 50,
+      progressValueColor: ['#60B3D7', '#E6F4FE'],
       color: null,
       toolTipText: null,
     },
@@ -488,6 +511,7 @@ export default () => {
       value: '$50',
       chartData: [98, 40, 60, 38, 42, 46, 40, 90, 95, 50],
       progressValue: null,
+      progressValueColor: null,
       color: '#F44336',
       toolTipText: null,
     },
@@ -496,6 +520,7 @@ export default () => {
       value: '2%',
       chartData: null,
       progressValue: 20,
+      progressValueColor: ['#60B3D7', '#E6F4FE'],
       color: null,
       toolTipText: null,
     },
@@ -504,6 +529,7 @@ export default () => {
       value: '3%',
       chartData: null,
       progressValue: 30,
+      progressValueColor: ['#60B3D7', '#E6F4FE'],
       color: null,
       toolTipText: null,
     },
