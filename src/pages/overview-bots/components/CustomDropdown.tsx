@@ -6,6 +6,8 @@ import {
   PointerIcon,
   Search24Icon,
 } from '@assets/icons';
+import { useAppDispatch } from '@store/hooks';
+import { setDisabledRunBacktest } from '@slices/generalSlice';
 
 export interface Option {
   label: string;
@@ -21,6 +23,7 @@ interface ICustomDropdownProps {
   disabled?: boolean;
   showTooTip?: boolean;
   isSearchable?: boolean;
+  searchableName?: string;
 }
 
 const CustomDropdown: React.FC<ICustomDropdownProps> = ({
@@ -30,6 +33,7 @@ const CustomDropdown: React.FC<ICustomDropdownProps> = ({
   disabled,
   showTooTip,
   isSearchable,
+  searchableName
 }) => {
   const dropDownRef = useRef<HTMLDivElement>(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -38,16 +42,17 @@ const CustomDropdown: React.FC<ICustomDropdownProps> = ({
     placeholder || (options.length > 0 ? options[0].label : 'Select Option')
   );
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-  const [textValue, setTextValue] = useState(selectedValue);
+  const [textValue, setTextValue] = useState({ [searchableName || ""]: '' });
   const [optionsObj] = useState(options);
   const [tooltipPos, setTooltipPos] = useState<{
     top: number;
     left: number;
   } | null>(null);
+  const dispatch = useAppDispatch();
 
   const handleOptionClick = (option: Option) => {
     setSelectedValue(option.label);
-    setTextValue(option.label);
+    setTextValue({ [searchableName || ""]: option.label });
     setIsOpen(false);
     setIsSelected(true);
     onSelect(option.value);
@@ -56,13 +61,13 @@ const CustomDropdown: React.FC<ICustomDropdownProps> = ({
 
   const filteredOpts = isSearchable
     ? optionsObj.filter((option) =>
-        option.label.toLowerCase().includes(textValue.toLowerCase())
+        option.label.toLowerCase().includes((textValue[searchableName || ""] || "").toLowerCase())
       )
     : optionsObj;
 
   const handleOnChange = (evt: ChangeEvent<HTMLInputElement>) => {
-    const value = evt.target.value;
-    setTextValue(value);
+    const {value, name} = evt.target;
+    setTextValue({ [name]: value });
   };
 
   const handleMouseEnter = (event: React.MouseEvent, idx: number) => {
@@ -114,6 +119,7 @@ const CustomDropdown: React.FC<ICustomDropdownProps> = ({
   };
 
   useEffect(() => {
+    dispatch(setDisabledRunBacktest(textValue[searchableName || ""]  === ""));
     const handleClickOutside = (event: MouseEvent) => {
       if (
         dropDownRef.current &&
@@ -126,7 +132,7 @@ const CustomDropdown: React.FC<ICustomDropdownProps> = ({
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, []);
+  }, [textValue[searchableName || ""]]);
 
   return (
     <div ref={dropDownRef} className="relative w-full">
@@ -148,7 +154,8 @@ const CustomDropdown: React.FC<ICustomDropdownProps> = ({
               }`}
             />{' '}
             <input
-              value={textValue}
+              value={textValue[searchableName || ""]}
+              name={searchableName}
               onChange={handleOnChange}
               placeholder="Search or choose"
               className="w-full text-sm text-dark-300 border-none outline-none m-0 placeholder:text-blue-200 placeholder:text-sm"
