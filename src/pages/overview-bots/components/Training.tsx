@@ -3,17 +3,13 @@ import { getDaysBtnDates, isTodayOrFuture } from '@utils/getDaysBtnDates.util';
 import { useAppDispatch, useAppSelector } from '@shared/hooks/useStore';
 import { useGetHistoricalCandlesMutation } from '@store/market/api';
 import { defaultType } from '../../../utils/defaultType.util';
-import { transformData } from '../../../utils/transformData';
 import { updateDefaults } from '../../../utils/updateDefault';
 import { SetURLSearchParams } from 'react-router-dom';
 import CustomInput from '@components/ui/CustomInput';
-import CandlestickChart from './CandlestickChart';
 import CustomDatePicker from './CustomDatePicker';
 import CustomBtn from '@components/ui/CustomBtn';
 import CustomDropdown from './CustomDropdown';
 import GroupedConfig from './GroupedConfig';
-import { FadeLoader } from 'react-spinners';
-import ButtonList from './ButtonList';
 import CustomText from './CustomText';
 import Pagination from './Pagination';
 import {
@@ -50,7 +46,9 @@ import {
   setCoinValues,
   setEndDate,
   setExpensesFee,
+  setIsFetchCandleData,
 } from '@slices/generalSlice';
+import GraphChart from './GraphChart';
 
 export interface ITrainingProps {
   timeQuery: ITimeTab;
@@ -114,7 +112,9 @@ const Training: React.FC<ITrainingProps> = ({
     SOL: '',
     USDC: '',
   });
-  const { endDate } = useAppSelector((state) => state.general);
+  const { endDate, disabledRunBacktest, isFetchCandleData } = useAppSelector(
+    (state) => state.general
+  );
   const dispatch = useAppDispatch();
 
   const uniqueGroups = Array.from(
@@ -138,8 +138,18 @@ const Training: React.FC<ITrainingProps> = ({
   ];
 
   const tradingPairOpts = [
-    { label: 'SOL—USDC', value: '1', tags: ['Largest Volume'], logo: <BinanceLogo /> },
-    { label: 'SOL—USDC', value: '2', tags: ['Most frequent'], logo: <MangoLogo /> },
+    {
+      label: 'SOL—USDC',
+      value: '1',
+      tags: ['Largest Volume'],
+      logo: <BinanceLogo />,
+    },
+    {
+      label: 'SOL—USDC',
+      value: '2',
+      tags: ['Most frequent'],
+      logo: <MangoLogo />,
+    },
     { label: 'SOL—USDT', value: '3', tags: undefined, logo: <UniswapLogo /> },
     { label: 'SOL—JUP', value: '4', tags: undefined, logo: <BinanceLogo /> },
     { label: 'SOL—USDT', value: '5', tags: undefined, logo: <CubeLogo /> },
@@ -180,6 +190,7 @@ const Training: React.FC<ITrainingProps> = ({
     if (!/^\d*$/.test(value)) return;
     setCoinValue((prevState) => ({ ...prevState, [name]: value }));
     dispatch(setCoinValues({ [name]: +value }));
+    dispatch(setIsFetchCandleData(false));
   };
 
   const handleOnToggle = (isOn: boolean, key: string) => {
@@ -210,19 +221,21 @@ const Training: React.FC<ITrainingProps> = ({
   };
 
   const handleCandleData = useCallback(async () => {
-    try {
-      await historicalCandlesData({
-        connector_name: 'birdeye',
-        trading_pair: tradePair,
-        market_address: '7vfCXTUXx5WJV5JADk17DUJ4ksgau7utNKj4b963voxs',
-        interval: '15m',
-        start_time: timeStamp.startTime,
-        end_time: timeStamp.endTime,
-      });
-    } catch (error) {
-      console.log('TRY CATCH ERROR => ', error);
+    if (isFetchCandleData) {
+      try {
+        await historicalCandlesData({
+          connector_name: 'birdeye',
+          trading_pair: tradePair,
+          market_address: '7vfCXTUXx5WJV5JADk17DUJ4ksgau7utNKj4b963voxs',
+          interval: '15m',
+          start_time: timeStamp.startTime,
+          end_time: timeStamp.endTime,
+        });
+      } catch (error) {
+        console.log('TRY CATCH ERROR => ', error);
+      }
     }
-  }, [tradePair, timeStamp]);
+  }, [tradePair, timeStamp, isFetchCandleData]);
 
   useEffect(() => {
     handleCandleData();
@@ -232,12 +245,10 @@ const Training: React.FC<ITrainingProps> = ({
     );
   }, [tradePair, timeStamp, coinValue]);
 
-  const disabled =
-    currentStep === 3
-      ? Object.values(coinValue).some((num) => num === '' || +num <= 0) ||
-        numOfTradeDays < 0 ||
-        !isTodayOrFuture(timeStamp.endDate)
-      : false;
+  const disabledDeposit =
+    Object.values(coinValue).some((num) => num === '' || +num <= 0) ||
+    numOfTradeDays < 0 ||
+    !isTodayOrFuture(timeStamp.endDate);
 
   return (
     <div ref={parentRef}>
@@ -263,8 +274,14 @@ const Training: React.FC<ITrainingProps> = ({
               ? 'Save Strategy'
               : 'Deposit & Start'
           }`}
-          disabled={disabled}
-          xtraStyles={`!max-w-[20.3125rem] !w-full`}
+          disabled={
+            currentStep === 1
+              ? disabledRunBacktest
+              : currentStep === 3
+              ? disabledDeposit
+              : false
+          }
+          xtraStyles={`!max-w-[18rem] lg:!max-w-[20.3125rem] !w-full !mt-5 md:!mt-0`}
           onClick={handleNextStep}
         />
       </div>
@@ -297,14 +314,14 @@ const Training: React.FC<ITrainingProps> = ({
         <div id="left" className="w-full">
           {currentStep == 1 ? (
             <div id="sliders_n_dropdowns" className="mt-6">
-              <div className="grid grid-cols-2 gap-x-5 gap-y-6 mb-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 md:gap-x-5 gap-y-6 mb-6">
                 {currentStep == 1 || currentStep == 2 ? (
                   <div className="flex justify-between items-center py-3 border-y border-light-300">
                     <p className="text-sm text-dark-200 ">Model name</p>
                     <p className="text-sm text-dark-300">Big Brain</p>
                   </div>
                 ) : null}
-                <div />
+                <div className='hidden md:block' />
                 <div id="COL 1" className="col-span-2 md:col-auto">
                   <CustomText
                     text="Exchange"
@@ -405,11 +422,11 @@ const Training: React.FC<ITrainingProps> = ({
               />
             </div>
           ) : currentStep == 3 ? (
-            <div className="mt-14 flex justify-between flex-wrap">
+            <div className="mt-14 flex flex-col lg:flex-row justify-between gap-y-8 lg:gap-y-0">
               <div id="left">
-                <div className="grid grid-cols-2 gap-x-6">
-                  <div className="w-[20.3125rem]">
-                    <h1 className="mb-7 font-semibold text-dark-300 text-2xl">
+                <div className="grid md:grid-cols-2 gap-x-6 gap-y-5 md:gap-y-0">
+                  <div className="xl:w-[20.3125rem]">
+                    <h1 className="mb-3 md:mb-7 font-semibold text-dark-300 text-2xl">
                       Connect exchange
                     </h1>
                     <CustomText
@@ -425,8 +442,8 @@ const Training: React.FC<ITrainingProps> = ({
                     />
                   </div>
 
-                  <div className="w-[20.3125rem]">
-                    <h1 className="mb-7 font-semibold text-dark-300 text-2xl">
+                  <div className="xl:w-[20.3125rem]">
+                    <h1 className="mb-3 md:mb-7 font-semibold text-dark-300 text-2xl">
                       Trading time limit
                     </h1>
                     <CustomText
@@ -439,16 +456,16 @@ const Training: React.FC<ITrainingProps> = ({
                   </div>
                 </div>
 
-                <h1 className="mt-7 mb-5 font-semibold text-dark-300 !text-2xl">
+                <h1 className="mb-3 md:mt-7 mt-5 font-semibold text-dark-300 !text-2xl">
                   Deposit both coins to start
                 </h1>
 
-                <div className="grid grid-cols-2 gap-x-6 gap-y-6">
+                <div className="grid md:grid-cols-2 gap-x-6 gap-y-6">
                   {[
                     { icon: <SolanaLogo />, text: 'SOL' },
                     { icon: <USDCLogo />, text: 'USDC' },
                   ].map(({ icon, text }, idx) => (
-                    <div key={idx} className="w-full max-w-[20.3125rem]">
+                    <div key={idx} className="w-full xl:max-w-[20.3125rem]">
                       <div className="mb-3">
                         <label
                           htmlFor={text}
@@ -480,7 +497,9 @@ const Training: React.FC<ITrainingProps> = ({
                           </span>
                         ))}
                       </div>
-                      <p className='text-dark-200 mt-2 text-[0.625rem]'>of connected wallet balance</p>
+                      <p className="text-dark-200 mt-2 text-[0.625rem]">
+                        of connected wallet balance
+                      </p>
                     </div>
                   ))}
                 </div>
@@ -488,7 +507,7 @@ const Training: React.FC<ITrainingProps> = ({
 
               <div
                 id="right"
-                className="max-w-[20.3125rem] w-full bg-light-300 rounded-[22px] p-6 h-fit"
+                className="md:max-w-[20.3125rem] w-full bg-light-300 rounded-[22px] p-6 h-fit"
               >
                 <h1 className="mb-7 font-semibold text-blue-400 text-xs text-center uppercase">
                   Deposit Info
@@ -525,37 +544,14 @@ const Training: React.FC<ITrainingProps> = ({
 
         {/* Only show chat when on step 1 and 2 */}
         {currentStep == 1 || currentStep == 2 ? (
-          <div ref={parentRef} id="right" className="w-full">
-            <div className="h-[500px] relative">
-              {isLoading ? (
-                <div className="absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 inset-x-auto">
-                  <FadeLoader color="#65636D" />
-                </div>
-              ) : (
-                <CandlestickChart
-                  height={500}
-                  data={data ? transformData(data.data) : []}
-                />
-              )}
-            </div>
-
-            <div>
-              <CustomText
-                text="timespan for the Backtest"
-                xtraStyle="mb-5 mt-7 font-semibold text-xs uppercase"
-              />
-              <div className="flex flex-col md:flex-row justify-between gap-y-4 md:gap-y-0 md:gap-x-4">
-                <CustomDatePicker
-                  ref={parentRef}
-                  getUnixTimeStamp={startTimeUnix}
-                />
-                <CustomDatePicker
-                  ref={parentRef}
-                  getUnixTimeStamp={endTimeUnix}
-                />
-              </div>
-            </div>
-          </div>
+          <GraphChart
+            data={data}
+            ref={parentRef}
+            className="hidden lg:block"
+            isLoading={isLoading}
+            startTimeUnix={startTimeUnix}
+            endTimeUnix={endTimeUnix}
+          />
         ) : null}
       </div>
 
@@ -580,11 +576,23 @@ const Training: React.FC<ITrainingProps> = ({
             <CustomBtn
               text="Select Optimal Strategy"
               btnStyle="outline-primary"
-              xtraStyles="!max-w-[11.625rem] !h-[1.9375rem] w-full !text-xs"
+              xtraStyles="!max-w-[11.625rem] !h-[1.9375rem] w-full !text-xs !mt-5 lg:!mt-0"
             />
           </>
         )}
       </div>
+
+      {/* Only show chat when on step 1 and 2 */}
+      {currentStep == 1 || currentStep == 2 ? (
+          <GraphChart
+            data={data}
+            ref={parentRef}
+            className="block lg:hidden"
+            isLoading={isLoading}
+            startTimeUnix={startTimeUnix}
+            endTimeUnix={endTimeUnix}
+          />
+        ) : null}
 
       {currentStep == 1 || currentStep == 2 ? (
         <>

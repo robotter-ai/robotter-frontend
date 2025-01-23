@@ -3,6 +3,8 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 interface AppState {
   endDate: Date | null;
   expenses: number;
+  isFetchCandleData: boolean;
+  disabledRunBacktest: boolean;
   fee: number;
   coinValue: { [key: string]: number };
 }
@@ -10,6 +12,8 @@ interface AppState {
 const initialState: AppState = {
   endDate: null,
   expenses: 0,
+  isFetchCandleData: true,
+  disabledRunBacktest: true,
   fee: 0,
   coinValue: {
     SOL: 0,
@@ -37,10 +41,21 @@ export const generalSlice = createSlice({
       state.expenses = payload.expenses;
       state.fee = payload.fee;
     },
+    setDisabledRunBacktest: (state, { payload }: { payload: boolean }) => {
+      state.disabledRunBacktest = payload;
+    },
+    setIsFetchCandleData: (state, { payload }: { payload: boolean }) => {
+      state.isFetchCandleData = payload;
+    }
   },
 });
 
-export const { setCoinValues, setEndDate, setExpensesFee } =
-  generalSlice.actions;
+export const {
+  setEndDate,
+  setCoinValues,  
+  setExpensesFee,
+  setIsFetchCandleData,
+  setDisabledRunBacktest,
+} = generalSlice.actions;
 
 export default generalSlice;

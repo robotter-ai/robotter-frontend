@@ -15,7 +15,7 @@ interface IGroupedConfigProps {
   hasOtherGroup?: boolean;
   uniqueGroups: string[];
   value: { [key: string]: number | string | boolean };
-  tradingPairOpts: Option[],
+  tradingPairOpts: Option[];
   handleOnInputChange: (evt: ChangeEvent<HTMLInputElement>) => void;
   handleOnRangeChange: (evt: ChangeEvent<HTMLInputElement>) => void;
   handleOnToggle: (isOn: boolean, key: string) => void;
@@ -123,6 +123,7 @@ const GroupedConfig = forwardRef<HTMLDivElement, IGroupedConfigProps>(
                   <NumberInput data={cfg.default.toString()} />
                 ) : formatText(key) === 'trading pair' ? (
                   <CustomDropdown
+                    searchableName="tradingPair"
                     options={tradingPairOpts}
                     onSelect={() => {}}
                     isSearchable
@@ -163,7 +164,7 @@ const GroupedConfig = forwardRef<HTMLDivElement, IGroupedConfigProps>(
               )}
               <div
                 className={`relative grid grid-cols-2 gap-x-5 gap-y-6 mb-8 ${
-                  hasOtherGroup ? 'grid-cols-4' : ''
+                  hasOtherGroup ? 'grid-cols-2 lg:grid-cols-4' : ''
                 }`}
               >
                 {objectConfig(group)}
