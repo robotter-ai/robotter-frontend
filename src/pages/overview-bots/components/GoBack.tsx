@@ -11,7 +11,7 @@ const GoBack: React.FC<IGoBackProps> = ({ onClick, disabled }) => {
     <div
       id="go_back_arrow"
       onClick={onClick}
-      className={`flex gap-x-2 ml-2 items-center cursor-pointer text-navy transition-all hover:translate-x-[-2px] hover:text-blue-300 ${
+      className={`flex gap-x-2 ml-2 mt-3 md:mt-0 items-center cursor-pointer text-navy transition-all hover:translate-x-[-2px] hover:text-blue-300 ${
         disabled ? '!text-dark-100 hover:!text-dark-100 hover:translate-x-0 cursor-text' : ''
       }`}
     >

@@ -38,7 +38,7 @@ const Stepper: React.FC<IStepperProps> = ({ currentStep, setCurrentStep }) => {
           <p
             id="step_text"
             className={classNames(
-              'text-xs text-dark-300 absolute bottom-[-25px] md:whitespace-nowrap',
+              'text-xs text-dark-300 absolute top-8 md:bottom-[-25px] md:whitespace-nowrap',
               {
                 'text-navy': currentStep === index + 1, // Current step text color
                 'text-green-100 cursor-pointer': currentStep > index + 1, // Previous step text color
@@ -70,4 +70,3 @@ const Stepper: React.FC<IStepperProps> = ({ currentStep, setCurrentStep }) => {
 };
 
 export default Stepper;
-
