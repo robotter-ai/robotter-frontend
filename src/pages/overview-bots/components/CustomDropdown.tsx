@@ -1,10 +1,19 @@
-import { ArrowDown2Icon, ArrowUp2Icon, PointerIcon } from '@assets/icons';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
+import {
+  ArrowDown2Icon,
+  ArrowUp2Icon,
+  PointerIcon,
+  Search24Icon,
+} from '@assets/icons';
+import { useAppDispatch } from '@store/hooks';
+import { setDisabledRunBacktest } from '@slices/generalSlice';
 
-interface Option {
+export interface Option {
   label: string;
   value: string;
+  tags?: string[];
+  logo?: JSX.Element;
 }
 
 interface ICustomDropdownProps {
@@ -13,6 +22,8 @@ interface ICustomDropdownProps {
   placeholder?: string;
   disabled?: boolean;
   showTooTip?: boolean;
+  isSearchable?: boolean;
+  searchableName?: string;
 }
 
 const CustomDropdown: React.FC<ICustomDropdownProps> = ({
@@ -21,6 +32,8 @@ const CustomDropdown: React.FC<ICustomDropdownProps> = ({
   placeholder,
   disabled,
   showTooTip,
+  isSearchable,
+  searchableName
 }) => {
   const dropDownRef = useRef<HTMLDivElement>(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -29,17 +42,32 @@ const CustomDropdown: React.FC<ICustomDropdownProps> = ({
     placeholder || (options.length > 0 ? options[0].label : 'Select Option')
   );
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [textValue, setTextValue] = useState({ [searchableName || ""]: '' });
+  const [optionsObj] = useState(options);
   const [tooltipPos, setTooltipPos] = useState<{
     top: number;
     left: number;
   } | null>(null);
+  const dispatch = useAppDispatch();
 
   const handleOptionClick = (option: Option) => {
     setSelectedValue(option.label);
+    setTextValue({ [searchableName || ""]: option.label });
     setIsOpen(false);
     setIsSelected(true);
     onSelect(option.value);
     setTooltipPos(null);
+  };
+
+  const filteredOpts = isSearchable
+    ? optionsObj.filter((option) =>
+        option.label.toLowerCase().includes((textValue[searchableName || ""] || "").toLowerCase())
+      )
+    : optionsObj;
+
+  const handleOnChange = (evt: ChangeEvent<HTMLInputElement>) => {
+    const {value, name} = evt.target;
+    setTextValue({ [name]: value });
   };
 
   const handleMouseEnter = (event: React.MouseEvent, idx: number) => {
@@ -51,7 +79,47 @@ const CustomDropdown: React.FC<ICustomDropdownProps> = ({
     setHoveredIndex(idx);
   };
 
+  const tagSpan = (tag: string, idx: number) => {
+    let bgColor = '';
+    switch (tag.toLowerCase()) {
+      case 'largest volume':
+        bgColor = '#E6F4FE';
+        break;
+      case 'binance':
+        bgColor = '#EFB621';
+        break;
+      case 'most frequent':
+        bgColor = '#E6F4FE';
+        break;
+      case 'mango':
+        bgColor = '#A3E5C8';
+        break;
+      case 'uniswap':
+        bgColor = '#E62788';
+        break;
+      case 'cube':
+        bgColor = '#FF822E';
+        break;
+      default:
+        bgColor = '';
+        break;
+    }
+    return (
+      <span
+        key={idx}
+        style={{
+          background: bgColor,
+          color: bgColor === '#E6F4FE' ? '#0d74ce' : '#113264',
+        }}
+        className={`text-[0.625rem] rounded-md px-1 py-[2px] text-blue-300`}
+      >
+        {tag}
+      </span>
+    );
+  };
+
   useEffect(() => {
+    dispatch(setDisabledRunBacktest(textValue[searchableName || ""]  === ""));
     const handleClickOutside = (event: MouseEvent) => {
       if (
         dropDownRef.current &&
@@ -64,37 +132,72 @@ const CustomDropdown: React.FC<ICustomDropdownProps> = ({
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, []);
+  }, [textValue[searchableName || ""]]);
 
   return (
-    <div ref={dropDownRef} className="relative w-full h-[2.25rem]">
+    <div ref={dropDownRef} className="relative w-full">
       <div
-        className={`px-4 py-2 rounded-[100px] bg-light-200 border border-transparent text-sm cursor-pointer flex items-center justify-between transition-colors hover:border-blue-300 ${
+        className={`pl-4 pr-6 py-2 w-full h-[2.25rem] rounded-[10px] border-none outline outline-1 outline-light-400 text-sm text-dark-300 cursor-pointer flex items-center justify-between transition-colors duration-75 hover:outline-blue-300/40 ${
           disabled
-            ? 'cursor-not-allowed hover:border-transparent'
+            ? 'cursor-not-allowed text-dark-200 bg-light-300 !outline-light-300 hover:!outline-light-300'
             : 'cursor-pointer'
-        } ${isOpen && !disabled ? 'border-blue-300' : ''} ${
+        } ${isOpen && !disabled ? '!outline-blue-300' : ''} ${
           placeholder && !isSelected ? 'text-blue-200' : 'text-blue-400'
         }`}
         onClick={() => setIsOpen(!isOpen)}
       >
-        {selectedValue}
-        {isOpen && !disabled ? <ArrowUp2Icon /> : <ArrowDown2Icon />}
+        {isSearchable ? (
+          <span className="flex items-center w-full m-0 gap-x-2">
+            <Search24Icon
+              className={`${
+                isOpen && !disabled ? 'text-blue-300' : 'text-light-400'
+              }`}
+            />{' '}
+            <input
+              value={textValue[searchableName || ""]}
+              name={searchableName}
+              onChange={handleOnChange}
+              placeholder="Search or choose"
+              className="w-full text-sm text-dark-300 border-none outline-none m-0 placeholder:text-blue-200 placeholder:text-sm"
+            />
+          </span>
+        ) : (
+          selectedValue
+        )}
+        {!disabled ? (
+          isOpen && !disabled ? (
+            <ArrowUp2Icon className="text-blue-300" />
+          ) : (
+            <ArrowDown2Icon className="text-light-400" />
+          )
+        ) : null}
       </div>
 
-      {isOpen && !disabled && (
+      {filteredOpts.length > 0 && isOpen && !disabled && (
         <div className="absolute w-full bg-dark-400 text-light-200 px-6 pt-2 pb-4 rounded-[22px] mt-2 max-h-60 overflow-y-auto z-10">
-          {options.map((option, idx) => (
+          {filteredOpts.map((option, idx) => (
             <div
               key={option.value}
-              className={`relative text-sm p-2 font-normal border-b border-chart-200 hover:bg-chart-200 cursor-pointer ${
-                idx === options.length - 1 ? 'border-none' : ''
+              className={`flex justify-between items-center relative text-sm py-2 font-normal border-b border-chart-200 hover:bg-chart-200 cursor-pointer ${
+                idx === filteredOpts.length - 1 ? 'border-none' : ''
               }`}
               onClick={() => handleOptionClick(option)}
               onMouseEnter={(e) => handleMouseEnter(e, idx)}
               onMouseLeave={() => setHoveredIndex(null)}
             >
-              {option.label}
+              <>{option.label}</>
+              <span className="flex gap-x-2 items-center">
+                {option.tags && (
+                  <span className="flex gap-x-2 items-center">
+                    {option.tags.map((tag, idx) => tagSpan(tag, idx))}
+                  </span>
+                )}
+                {option.logo && (
+                  <span className="bg-white w-4 h-4 p-[0.1rem] rounded-[4px] flex justify-center items-center">
+                    {option.logo}
+                  </span>
+                )}
+              </span>
             </div>
           ))}
         </div>

@@ -6,7 +6,7 @@ const instanceApi = robotterApi.injectEndpoints({
     getHistoricalCandles: builder.mutation<CandleDataResp, CandleProps>({
       query: (data) => ({
         method: 'POST',
-        url: `/historical-candles`,
+        url: `/api/v1/historical-candles`,
         data,
       }),
       invalidatesTags: ['Candle'],

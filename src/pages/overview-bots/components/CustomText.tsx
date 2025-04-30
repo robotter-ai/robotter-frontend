@@ -8,10 +8,22 @@ interface ICustomTextProps {
   hasQuestionMark?: boolean;
   xtraStyle?: string;
   toolTipWidth?: string;
+  isEmpty?: boolean;
 }
 
 const CustomText = forwardRef<HTMLDivElement, ICustomTextProps>(
-  ({ text, toolTipText, showOptText, hasQuestionMark = true, xtraStyle, toolTipWidth }, ref) => {
+  (
+    {
+      text,
+      toolTipText,
+      showOptText,
+      hasQuestionMark = true,
+      xtraStyle,
+      toolTipWidth,
+      isEmpty,
+    },
+    ref
+  ) => {
     const [showToolTip, setShowToolTip] = useState(false);
     const spanRef = useRef<HTMLSpanElement>(null);
 
@@ -34,20 +46,30 @@ const CustomText = forwardRef<HTMLDivElement, ICustomTextProps>(
     }, []);
 
     return (
-      <p className={`flex items-center gap-x-1 text-sm font-normal text-dark-200 leading-none w-fit ${xtraStyle}`}>
+      <p
+        className={`flex items-center gap-x-1 text-sm font-normal text-dark-200 leading-none w-fit ${xtraStyle}`}
+      >
         {text}
-        {showOptText && <span className="text-light-400 text-xs uppercase">(Optional)</span>}
+        {showOptText && (
+          <span className="text-light-400 text-xs uppercase">(Optional)</span>
+        )}
         {hasQuestionMark && (
           <span className="relative">
             <span
               ref={spanRef}
-              className="w-4 h-4 text-light-400 border border-light-400 rounded-full cursor-pointer text-xs flex items-center justify-center"
+              className={`w-4 h-4 text-light-400 border border-light-400 rounded-full text-xs flex items-center justify-center ${
+                !isEmpty ? 'cursor-pointer' : ''
+              }`}
               onClick={handleToolTipToggle}
             >
               ?
             </span>
-            {showToolTip && (
-              <Tooltip ref={ref} text={toolTipText || text} width={toolTipWidth} />
+            {showToolTip && !isEmpty && (
+              <Tooltip
+                ref={ref}
+                text={toolTipText || text}
+                width={toolTipWidth}
+              />
             )}
           </span>
         )}

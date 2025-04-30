@@ -27,7 +27,8 @@
       "@pages/*": ["src/pages/*"],
       "@shared/*": ["src/shared/*"],
       "@slices/*": ["src/slices/*"],
-      "@store/*": ["src/store/*"]
+      "@store/*": ["src/store/*"],
+      "@utils/*": ["src/utils/*"]
     }
   },
   "include": [".eslintrc.json", "src"],

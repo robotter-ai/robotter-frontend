@@ -1,5 +1,4 @@
-import { UpIcon, DownIcon } from '@assets/icons';
-import CustomButton from '@components/ui/Button';
+import { UpIcon, DownIcon, BotIcon } from '@assets/icons';
 import classNames from 'classnames';
 import React from 'react';
 import CustomBtn from '@components/ui/CustomBtn';
@@ -11,22 +10,36 @@ interface ICardBotProps {
   cardBotData: ICardBotData;
   xtraStyle?: string;
   isEmpty: boolean;
+  showSideColor?: boolean;
 }
 
 const CardBot: React.FC<ICardBotProps> = ({
   cardBotData,
   xtraStyle,
   isEmpty,
+  showSideColor,
 }) => {
   return (
     <div
       id="card_bot"
-      className={`relative lt:w-full lt:max-w-max max-w-[20.3125rem] w-full h-[11.9375rem] rounded-[22px] bg-light-200 border border-chart-300 p-4 mb-4 pt-[1.50rem] ${
+      style={{ background: !isEmpty ? cardBotData.color : '' }}
+      className={`relative lt:w-full lt:max-w-max max-w-[20.3125rem] w-full h-[11.9375rem] rounded-[22px] border border-light-250 mb-4 overflow-hidden ${
         xtraStyle || ''
-      } ${isEmpty ? 'bg-light-300 border-light-300' : ''}`}
+      } ${isEmpty ? 'bg-light-250 border-light-250' : ''} ${
+        showSideColor ? 'pl-2' : ''
+      }`}
     >
-      {!isEmpty && (
-        <div>
+      {isEmpty ? (
+        <div className="w-full h-full flex justify-center items-center">
+          <div className="flex flex-col items-center">
+            <BotIcon />
+            <p className="text-dark-200 text-xs font-medium mt-2">
+              CREATE NEW BOT
+            </p>
+          </div>
+        </div>
+      ) : (
+        <div className="bg-light-250 p-4 rounded-[15px] h-full w-full">
           <div id="table">
             {cardBotData.tableData.map((row, i) => (
               <div key={i} id="row" className="grid grid-cols-6 gap-x-2 mb-2">
@@ -50,19 +63,9 @@ const CardBot: React.FC<ICardBotProps> = ({
                             }`}
                           </h2>
                           <p className="text-[0.625rem] whitespace-nowrap text-dark-200 m-0">
-                            P&L last week
+                            P&L, last 24h
                           </p>
                         </div>
-                        {cardBotData.lineChartData && (
-                          <div className="w-[3.375rem] h-auto">
-                            <MiniLineChart
-                              data={cardBotData.lineChartData}
-                              color={
-                                cardBotData.isPositive ? '#218358' : '#CE2C31'
-                              }
-                            />
-                          </div>
-                        )}
                       </div>
                     </div>
 
@@ -78,8 +81,8 @@ const CardBot: React.FC<ICardBotProps> = ({
                 )}
 
                 <div id="col1" className="flex-1 col-span-2">
-                  <h2 className="font-semibold text-xs text-dark-300">
-                    {row.labelA[0]}%
+                  <h2 className="text-[0.8125rem] text-dark-300 font-ubuntumono font-normal">
+                    {row.labelA[0]}
                   </h2>
                   <p className="text-[0.625rem] text-dark-200 mt-0 leading-none">
                     {row.labelA[1]}
@@ -88,28 +91,14 @@ const CardBot: React.FC<ICardBotProps> = ({
 
                 <div
                   id="col2"
-                  className="grid grid-cols-3 col-span-3 items-center gap-x-2 flex-1"
+                  className="items-center gap-x-2 flex-1"
                 >
                   <div>
-                    <h2 className="text-xs text-dark-300">{row.labelB[0]}</h2>
+                    <h2 className="text-[0.8125rem] font-ubuntumono font-normal text-dark-300 whitespace-nowrap">{row.labelB[0]}</h2>
                     <p className="text-[0.625rem] text-dark-200 mt-[-2px] whitespace-nowrap">
                       {row.labelB[1]}
                     </p>
                   </div>
-                  {row.percentage !== null && (
-                    <div
-                      id="tag"
-                      className={classNames(
-                        'flex justify-center items-center min-w-[2.625rem] h-[1.1875rem] bg-green-100 rounded-[6px] px-1 py-[2px] gap-x-1',
-                        { 'bg-red-100': !row.isProfit }
-                      )}
-                    >
-                      {row.isProfit ? <UpIcon /> : <DownIcon />}
-                      <h2 className="font-semibold text-xs text-white">
-                        {row.percentage}%
-                      </h2>
-                    </div>
-                  )}
                 </div>
 
                 {i === 0 && (

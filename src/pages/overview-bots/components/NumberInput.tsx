@@ -17,11 +17,11 @@ interface INumberInputProps {
 }
 
 const NumberTag: React.FC<INumberTagProps> = ({ number, onRemove }) => (
-  <div className="flex items-center bg-blue-200 text-white rounded-[35px] px-2 py-1 m-1 h-[1.5625rem]">
+  <div className="flex items-center bg-green-200 text-green-100 rounded-[35px] px-2 py-1 m-1 h-[1.5625rem]">
     <span className="mr-2 font-normal text-sm">{number}</span>
     <button
       onClick={onRemove}
-      className="text-blue-400 transition-colors duration-300 hover:text-white"
+      className="text-white transition-colors duration-300 hover:text-green-100"
     >
       <SlClose />
     </button>
@@ -86,7 +86,7 @@ const NumberInput: React.FC<INumberInputProps> = ({ data }) => {
 
   return (
     <div
-      className="px-4 py-2 bg-light-200 cursor-text rounded-[22px] outline-2 outline outline-transparent transition-colors duration-300 border border-transparent text-blue-400 focus-within:outline-blue-300 focus-within:hover:border-transparent hover:border-blue-300/50"
+      className="px-4 py-2 cursor-text rounded-[10px] outline outline-1 outline-light-400 transition-colors duration-300 border-none text-blue-400 focus-within:outline-blue-300 focus-within:hover:outline-blue-300 hover:outline-blue-300/40"
       onClick={handleOnClick}
     >
       <div className="flex flex-wrap">
@@ -106,7 +106,7 @@ const NumberInput: React.FC<INumberInputProps> = ({ data }) => {
           placeholder={
             numbers.length === 0 ? 'Input a value and press Enter' : ''
           }
-          className={`flex-none bg-transparent pl-1 border-none outline-none placeholder:text-blue-200 ${
+          className={`flex-none bg-transparent pl-1 border-none text-sm font-normal outline-none placeholder:text-blue-200 ${
             numbers.length === 0 ? 'w-full' : 'max-w-[10ch]'
           }`}
         />

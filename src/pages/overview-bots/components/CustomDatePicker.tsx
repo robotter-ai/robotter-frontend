@@ -9,13 +9,14 @@ type ValuePiece = Date | null;
 type Value = ValuePiece | [ValuePiece, ValuePiece];
 
 interface ICustomDatePickerProps {
-  getUnixTimeStamp: (unixTimeStamp: number) => void;
+  getUnixTimeStamp?: (unixTimeStamp: number) => void;
   direction?: 'right' | 'left' | 'bottom' | 'top';
-  isEmpty?: boolean
+  getDate?: (date: Date) => void;
+  isEmpty?: boolean;
 }
 
 const CustomDatePicker = forwardRef<HTMLDivElement, ICustomDatePickerProps>(
-  ({ getUnixTimeStamp, direction = 'bottom', isEmpty }, ref) => {
+  ({ getUnixTimeStamp, getDate, direction = 'bottom', isEmpty }, ref) => {
     const [value, setValue] = useState<Value>(isEmpty ? null : new Date());
     const [isCalendarOpen, setIsCalendarOpen] = useState(false);
     const [activeMonth, setActiveMonth] = useState(new Date());
@@ -59,7 +60,8 @@ const CustomDatePicker = forwardRef<HTMLDivElement, ICustomDatePickerProps>(
 
       if (date instanceof Date) {
         const unixTimestamp = Math.floor(date.getTime() / 1000);
-        getUnixTimeStamp(unixTimestamp);
+        getUnixTimeStamp && getUnixTimeStamp(unixTimestamp);
+        getDate && getDate(date);
       }
 
       setIsCalendarOpen(false);
@@ -81,6 +83,15 @@ const CustomDatePicker = forwardRef<HTMLDivElement, ICustomDatePickerProps>(
       const newDate = new Date(activeMonth);
       newDate.setMonth(newDate.getMonth() - 3 + index);
       setActiveMonth(newDate);
+    };
+
+    // New: Handle next and previous year
+    const handleNextYear = () => {
+      setActiveMonth(new Date(activeMonth.setFullYear(activeMonth.getFullYear() + 1)));
+    };
+
+    const handlePrevYear = () => {
+      setActiveMonth(new Date(activeMonth.setFullYear(activeMonth.getFullYear() - 1)));
     };
 
     // Close calendar when clicking outside
@@ -133,19 +144,21 @@ const CustomDatePicker = forwardRef<HTMLDivElement, ICustomDatePickerProps>(
       <div className="relative w-full">
         <div
           onClick={() => setIsCalendarOpen(!isCalendarOpen)}
-          className={`flex items-center bg-light-200 text-dark-blue text-sm w-full h-[2.25rem] rounded-[100px] px-5 cursor-pointer border border-transparent hover:border-blue-300/50 outline outline-2 outline-transparent ${
-            isCalendarOpen ? 'outline-blue-300 hover:border-white' : ''
+          className={`flex items-center text-dark-blue text-sm w-full h-[2.25rem] rounded-[10px] px-5 text-dark-300 cursor-pointer border-none hover:outline-blue-300/40 outline outline-1 outline-light-400 ${
+            isCalendarOpen ? '!outline-blue-300 hover:border-white' : ''
           }`}
         >
-          <span className={`${!value ? 'text-sm font-normal text-blue-200' : ''}`}>
-            {value
-              ? (value as Date).toLocaleDateString('en-CA')
-              : 'YYYY-MM-DD'}
+          <span
+            className={`${!value ? 'text-sm font-normal text-blue-200' : ''}`}
+          >
+            {value ? (value as Date).toLocaleDateString('en-CA') : 'YYYY-MM-DD'}
           </span>
         </div>
 
         <CalendarIcon
-          className="absolute right-2 top-[20%] cursor-pointer"
+          className={`absolute right-5 top-[20%] cursor-pointer ${
+            isCalendarOpen ? 'text-blue-300' : 'text-light-400'
+          }`}
           onClick={() => setIsCalendarOpen(!isCalendarOpen)}
         />
 
@@ -216,8 +229,14 @@ const CustomDatePicker = forwardRef<HTMLDivElement, ICustomDatePickerProps>(
             </div>
 
             {/* Right section for years */}
-            <div className="flex items-center border-l border-chart-200 mr-[-10px]">
-              <div className="flex flex-col w-full h-56  overflow-y-auto">
+            <div className="flex flex-col items-center border-l border-chart-200 mr-[-10px]">
+              <button
+                onClick={handlePrevYear}
+                className="text-turkish font-normal text-sm mt-1 mr-2"
+              >
+                <FaChevronRight className='-rotate-90' />
+              </button>
+              <div className="flex flex-col w-full h-56 overflow-y-auto">
                 {[...Array(10)].map((_, i) => {
                   const year = activeMonth.getFullYear() - 5 + i;
                   return (
@@ -237,6 +256,12 @@ const CustomDatePicker = forwardRef<HTMLDivElement, ICustomDatePickerProps>(
                   );
                 })}
               </div>
+              <button
+                onClick={handleNextYear}
+                className="text-turkish font-normal text-sm mb-1 mr-2"
+              >
+                <FaChevronRight className='rotate-90' />
+              </button>
             </div>
           </div>
         )}

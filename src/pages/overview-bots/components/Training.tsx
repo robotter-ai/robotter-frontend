@@ -1,25 +1,27 @@
 import { strategiesConfigData as config } from '../../../utils/strategyConfigData';
-import {
-  ArrowDown2Icon,
-  ArrowUp2Icon,
-  MangoLogo,
-  SolanaLogo,
-  USDCLogo,
-} from '@assets/icons';
+import { getDaysBtnDates, isTodayOrFuture } from '@utils/getDaysBtnDates.util';
+import { useAppDispatch, useAppSelector } from '@shared/hooks/useStore';
 import { useGetHistoricalCandlesMutation } from '@store/market/api';
 import { defaultType } from '../../../utils/defaultType.util';
-import { transformData } from '../../../utils/transformData';
 import { updateDefaults } from '../../../utils/updateDefault';
 import { SetURLSearchParams } from 'react-router-dom';
-import CandlestickChart from './CandlestickChart';
+import CustomInput from '@components/ui/CustomInput';
 import CustomDatePicker from './CustomDatePicker';
 import CustomBtn from '@components/ui/CustomBtn';
 import CustomDropdown from './CustomDropdown';
 import GroupedConfig from './GroupedConfig';
-import { FadeLoader } from 'react-spinners';
-import ButtonList from './ButtonList';
 import CustomText from './CustomText';
 import Pagination from './Pagination';
+import {
+  ArrowDown2Icon,
+  ArrowUp2Icon,
+  BinanceLogo,
+  CubeLogo,
+  MangoLogo,
+  SolanaLogo,
+  UniswapLogo,
+  USDCLogo,
+} from '@assets/icons';
 import React, {
   ChangeEvent,
   Fragment,
@@ -40,7 +42,13 @@ import Switcher from './Switcher';
 import CardBot from './CardBot';
 import GoBack from './GoBack';
 import LineTab from './LineTab';
-import CustomInput from '@components/ui/CustomInput';
+import {
+  setCoinValues,
+  setEndDate,
+  setExpensesFee,
+  setIsFetchCandleData,
+} from '@slices/generalSlice';
+import GraphChart from './GraphChart';
 
 export interface ITrainingProps {
   timeQuery: ITimeTab;
@@ -57,6 +65,12 @@ export interface ITrainingProps {
 
 interface ValueType {
   [key: string]: number | string | boolean;
+}
+
+interface ITimestamp {
+  startTime: number;
+  endTime: number;
+  endDate: Date | null;
 }
 
 const Training: React.FC<ITrainingProps> = ({
@@ -89,15 +103,19 @@ const Training: React.FC<ITrainingProps> = ({
   const [advancedSettingsOpen, setAdancedSettingsOpen] = useState(false);
   const [value, setValue] = useState<ValueType>(Object.fromEntries(valueArr));
   const [tradePair, setTradePair] = useState('SOL/BNB');
-  const [timeStamp, setTimeStamp] = useState({
+  const [timeStamp, setTimeStamp] = useState<ITimestamp>({
     startTime: 1727771877,
     endTime: 1728376677,
-    endDate: 0,
+    endDate: null,
   });
   const [coinValue, setCoinValue] = useState<{ [key: string]: string }>({
     SOL: '',
     USDC: '',
   });
+  const { endDate, disabledRunBacktest, isFetchCandleData } = useAppSelector(
+    (state) => state.general
+  );
+  const dispatch = useAppDispatch();
 
   const uniqueGroups = Array.from(
     new Set(Object.values(config[cfgName]).map((item) => item.group))
@@ -118,6 +136,26 @@ const Training: React.FC<ITrainingProps> = ({
     { label: 'Polka DEX', value: '6' },
     { label: 'Uniswap', value: '7' },
   ];
+
+  const tradingPairOpts = [
+    {
+      label: 'SOL—USDC',
+      value: '1',
+      tags: ['Largest Volume'],
+      logo: <BinanceLogo />,
+    },
+    {
+      label: 'SOL—USDC',
+      value: '2',
+      tags: ['Most frequent'],
+      logo: <MangoLogo />,
+    },
+    { label: 'SOL—USDT', value: '3', tags: undefined, logo: <UniswapLogo /> },
+    { label: 'SOL—JUP', value: '4', tags: undefined, logo: <BinanceLogo /> },
+    { label: 'SOL—USDT', value: '5', tags: undefined, logo: <CubeLogo /> },
+  ];
+
+  const numOfTradeDays = getDaysBtnDates(endDate ? endDate : new Date());
 
   const toggleAdancedSettingsOpen = () =>
     setAdancedSettingsOpen((prevState) => !prevState);
@@ -151,6 +189,8 @@ const Training: React.FC<ITrainingProps> = ({
     const { value, name } = evt.target;
     if (!/^\d*$/.test(value)) return;
     setCoinValue((prevState) => ({ ...prevState, [name]: value }));
+    dispatch(setCoinValues({ [name]: +value }));
+    dispatch(setIsFetchCandleData(false));
   };
 
   const handleOnToggle = (isOn: boolean, key: string) => {
@@ -175,33 +215,40 @@ const Training: React.FC<ITrainingProps> = ({
     setTimeStamp((prevState) => ({ ...prevState, endTime: unix }));
   };
 
-  const endDateUnix = (unix: number) => {
-    setTimeStamp((prevState) => ({ ...prevState, endDate: unix }));
+  const getEndDate = (date: Date) => {
+    setTimeStamp((prevState) => ({ ...prevState, endDate: date }));
+    dispatch(setEndDate(date));
   };
 
   const handleCandleData = useCallback(async () => {
-    try {
-      await historicalCandlesData({
-        connector_name: 'birdeye',
-        trading_pair: tradePair,
-        market_address: '7vfCXTUXx5WJV5JADk17DUJ4ksgau7utNKj4b963voxs',
-        interval: '15m',
-        start_time: timeStamp.startTime,
-        end_time: timeStamp.endTime,
-      });
-    } catch (error) {
-      console.log('TRY CATCH ERROR => ', error);
+    if (isFetchCandleData) {
+      try {
+        await historicalCandlesData({
+          connector_name: 'birdeye',
+          trading_pair: tradePair,
+          market_address: '7vfCXTUXx5WJV5JADk17DUJ4ksgau7utNKj4b963voxs',
+          interval: '15m',
+          start_time: timeStamp.startTime,
+          end_time: timeStamp.endTime,
+        });
+      } catch (error) {
+        console.log('TRY CATCH ERROR => ', error);
+      }
     }
-  }, [tradePair, timeStamp]);
+  }, [tradePair, timeStamp, isFetchCandleData]);
 
   useEffect(() => {
     handleCandleData();
-  }, [tradePair, timeStamp]);
+    const isEmpty = Object.values(coinValue).every((num) => num !== '');
+    dispatch(
+      setExpensesFee({ expenses: isEmpty ? 8 : 0, fee: isEmpty ? 5 : 0 })
+    );
+  }, [tradePair, timeStamp, coinValue]);
 
-  const disabled =
-    currentStep === 3 ?
+  const disabledDeposit =
     Object.values(coinValue).some((num) => num === '' || +num <= 0) ||
-    timeStamp.endDate === 0 : false;
+    numOfTradeDays < 0 ||
+    !isTodayOrFuture(timeStamp.endDate);
 
   return (
     <div ref={parentRef}>
@@ -227,13 +274,19 @@ const Training: React.FC<ITrainingProps> = ({
               ? 'Save Strategy'
               : 'Deposit & Start'
           }`}
-          disabled={disabled}
-          xtraStyles={`!max-w-[20.3125rem] !w-full`}
+          disabled={
+            currentStep === 1
+              ? disabledRunBacktest
+              : currentStep === 3
+              ? disabledDeposit
+              : false
+          }
+          xtraStyles={`!max-w-[18rem] lg:!max-w-[20.3125rem] !w-full !mt-5 md:!mt-0`}
           onClick={handleNextStep}
         />
       </div>
       {currentStep == 1 || currentStep == 2 ? (
-        <div className="flex items-center justify-between mt-8 mb-6 flex-wrap gap-y-4 md:gap-y-0">
+        <div className="flex items-center justify-between mt-8 mb-2 flex-wrap gap-y-4 md:gap-y-0">
           <h2 className="font-semibold text-2xl text-dark-300">
             {`Backtest ${
               currentStep === 1
@@ -259,20 +312,16 @@ const Training: React.FC<ITrainingProps> = ({
         className="flex flex-col lg:flex-row justify-between gap-y-8 lg:gap-y-0 lg:gap-x-4"
       >
         <div id="left" className="w-full">
-          {currentStep == 1 || currentStep == 2 ? (
-            <div>
-              <p className="uppercase text-xs font-semibold text-dark-200 mb-5">
-                {currentStep == 1
-                  ? 'Adjust settings for each trading pair separately'
-                  : 'Click on Trading Pair to view the Results of the backtest'}
-              </p>
-              <ButtonList btnData={solData} getTradePair={getTradePair} />
-            </div>
-          ) : null}
-
           {currentStep == 1 ? (
             <div id="sliders_n_dropdowns" className="mt-6">
-              <div className="grid grid-cols-2 gap-x-5 gap-y-6 mb-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 md:gap-x-5 gap-y-6 mb-6">
+                {currentStep == 1 || currentStep == 2 ? (
+                  <div className="flex justify-between items-center py-3 border-y border-light-300">
+                    <p className="text-sm text-dark-200 ">Model name</p>
+                    <p className="text-sm text-dark-300">Big Brain</p>
+                  </div>
+                ) : null}
+                <div className='hidden md:block' />
                 <div id="COL 1" className="col-span-2 md:col-auto">
                   <CustomText
                     text="Exchange"
@@ -302,6 +351,7 @@ const Training: React.FC<ITrainingProps> = ({
                   config={config}
                   cfgName={cfgName}
                   value={value}
+                  tradingPairOpts={tradingPairOpts}
                   handleOnInputChange={handleOnInputChange}
                   handleOnRangeChange={handleOnRangeChange}
                   handleOnToggle={handleOnToggle}
@@ -351,9 +401,9 @@ const Training: React.FC<ITrainingProps> = ({
                     <p
                       className={`text-right text-dark-300 ${
                         getReStatQuery === 'result'
-                          ? i === 1 || i === 2
+                          ? i === 2 || i === 3
                             ? 'text-green-100'
-                            : i === 3
+                            : i === 4
                             ? 'text-red-100'
                             : ''
                           : ''
@@ -372,11 +422,11 @@ const Training: React.FC<ITrainingProps> = ({
               />
             </div>
           ) : currentStep == 3 ? (
-            <div className="mt-14 flex justify-between flex-wrap">
+            <div className="mt-14 flex flex-col lg:flex-row justify-between gap-y-8 lg:gap-y-0">
               <div id="left">
-                <div className="grid grid-cols-2 gap-x-6">
-                  <div className="w-[20.3125rem]">
-                    <h1 className="mb-7 font-semibold text-dark-300 text-2xl">
+                <div className="grid md:grid-cols-2 gap-x-6 gap-y-5 md:gap-y-0">
+                  <div className="xl:w-[20.3125rem]">
+                    <h1 className="mb-3 md:mb-7 font-semibold text-dark-300 text-2xl">
                       Connect exchange
                     </h1>
                     <CustomText
@@ -392,8 +442,8 @@ const Training: React.FC<ITrainingProps> = ({
                     />
                   </div>
 
-                  <div className="w-[20.3125rem]">
-                    <h1 className="mb-7 font-semibold text-dark-300 text-2xl">
+                  <div className="xl:w-[20.3125rem]">
+                    <h1 className="mb-3 md:mb-7 font-semibold text-dark-300 text-2xl">
                       Trading time limit
                     </h1>
                     <CustomText
@@ -402,50 +452,62 @@ const Training: React.FC<ITrainingProps> = ({
                       toolTipText={`Select the date when trading will stop. Trading duration impacts Compute expenses and Solana fees.`}
                       xtraStyle="mb-4 font-semibold text-xs uppercase"
                     />
-                    <CustomDatePicker getUnixTimeStamp={endDateUnix} isEmpty />
+                    <CustomDatePicker getDate={getEndDate} isEmpty />
                   </div>
                 </div>
 
-                <h1 className="mt-7 mb-5 font-semibold text-dark-300 !text-2xl">
+                <h1 className="mb-3 md:mt-7 mt-5 font-semibold text-dark-300 !text-2xl">
                   Deposit both coins to start
                 </h1>
 
-                <div className="grid grid-cols-2 gap-x-6 gap-y-6">
+                <div className="grid md:grid-cols-2 gap-x-6 gap-y-6">
                   {[
                     { icon: <SolanaLogo />, text: 'SOL' },
                     { icon: <USDCLogo />, text: 'USDC' },
                   ].map(({ icon, text }, idx) => (
-                    <Fragment key={idx}>
-                      <div className="w-full max-w-[20.3125rem]">
-                        <CustomText
-                          text="Coin"
-                          hasQuestionMark={false}
-                          xtraStyle="mb-3 font-semibold text-xs uppercase"
-                        />
-                        <CustomInput icon={icon} disabled defaultValue={text} />
+                    <div key={idx} className="w-full xl:max-w-[20.3125rem]">
+                      <div className="mb-3">
+                        <label
+                          htmlFor={text}
+                          className="font-semibold text-xs uppercase text-dark-200"
+                        >
+                          Amount
+                        </label>
                       </div>
-                      <div className="w-full max-w-[20.3125rem]">
-                        <CustomText
-                          text="Amount"
-                          hasQuestionMark={false}
-                          xtraStyle="mb-3 font-semibold text-xs uppercase"
-                        />
-                        <CustomInput
-                          type="number"
-                          placeholder="0"
-                          name={text}
-                          value={coinValue[text]}
-                          onChange={handleOnCoinInputChange}
-                        />
+                      <CustomInput
+                        id={text}
+                        type="number"
+                        placeholder="0"
+                        name={text}
+                        value={coinValue[text]}
+                        onChange={handleOnCoinInputChange}
+                        postIcon={
+                          <span className="flex gap-x-3 items-center font-ubuntumono text-[0.8125rem] font-normal">
+                            <p>{text}</p> <>{icon}</>{' '}
+                          </span>
+                        }
+                      />
+                      <div className="flex gap-x-2 mt-4 uppercase">
+                        {['$100', '$300', '$500', 'Max'].map((data, idx) => (
+                          <span
+                            key={idx}
+                            className="flex justify-center items-center px-2 h-[23px] text-center rounded-[15px] bg-light-200 text-blue-200 text-xs"
+                          >
+                            {data}
+                          </span>
+                        ))}
                       </div>
-                    </Fragment>
+                      <p className="text-dark-200 mt-2 text-[0.625rem]">
+                        of connected wallet balance
+                      </p>
+                    </div>
                   ))}
                 </div>
               </div>
 
               <div
                 id="right"
-                className="max-w-[20.3125rem] w-full bg-light-300 rounded-[22px] p-6 h-fit"
+                className="md:max-w-[20.3125rem] w-full bg-light-300 rounded-[22px] p-6 h-fit"
               >
                 <h1 className="mb-7 font-semibold text-blue-400 text-xs text-center uppercase">
                   Deposit Info
@@ -454,24 +516,24 @@ const Training: React.FC<ITrainingProps> = ({
                 <div id="table" className="grid grid-cols-[auto_6.2rem]">
                   {depositInfo.map(({ l, r, icon }, i) => (
                     <Fragment key={i}>
-                      <span
+                      <div
                         className={`font-normal text-sm text-dark-200 text-left ${
                           i == 0 ? 'border-t' : 'border-y'
                         } p-[0.5rem] border-white`}
                       >
                         {l}
-                      </span>
-                      <span
-                        className={`flex items-center justify-end gap-x-2 font-normal text-sm text-dark-300 text-right ${
+                      </div>
+                      <div
+                        className={`flex items-center justify-end gap-x-2 font-normal font-ubuntumono text-sm text-dark-300 text-right ${
                           i == 0 ? 'border-t' : 'border-y'
                         } p-[0.5rem] border-white ${
                           depositInfo.length === i + 1
-                            ? 'text-base font-medium'
+                            ? 'text-base font-medium font-inter'
                             : ''
                         }`}
                       >
-                        {r} {icon && icon}
-                      </span>
+                        {r} {icon && <span>{icon}</span>}
+                      </div>
                     </Fragment>
                   ))}
                 </div>
@@ -482,37 +544,14 @@ const Training: React.FC<ITrainingProps> = ({
 
         {/* Only show chat when on step 1 and 2 */}
         {currentStep == 1 || currentStep == 2 ? (
-          <div ref={parentRef} id="right" className="w-full">
-            <div className="h-[500px] relative">
-              {isLoading ? (
-                <div className="absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 inset-x-auto">
-                  <FadeLoader color="#65636D" />
-                </div>
-              ) : (
-                <CandlestickChart
-                  height={500}
-                  data={data ? transformData(data.data) : []}
-                />
-              )}
-            </div>
-
-            <div>
-              <CustomText
-                text="timespan for the Backtest"
-                xtraStyle="mb-5 mt-7 font-semibold text-xs uppercase"
-              />
-              <div className="flex flex-col md:flex-row justify-between gap-y-4 md:gap-y-0 md:gap-x-4">
-                <CustomDatePicker
-                  ref={parentRef}
-                  getUnixTimeStamp={startTimeUnix}
-                />
-                <CustomDatePicker
-                  ref={parentRef}
-                  getUnixTimeStamp={endTimeUnix}
-                />
-              </div>
-            </div>
-          </div>
+          <GraphChart
+            data={data}
+            ref={parentRef}
+            className="hidden lg:block"
+            isLoading={isLoading}
+            startTimeUnix={startTimeUnix}
+            endTimeUnix={endTimeUnix}
+          />
         ) : null}
       </div>
 
@@ -527,6 +566,7 @@ const Training: React.FC<ITrainingProps> = ({
                 config={config}
                 cfgName={cfgName}
                 value={value}
+                tradingPairOpts={tradingPairOpts}
                 handleOnInputChange={handleOnInputChange}
                 handleOnRangeChange={handleOnRangeChange}
                 handleOnToggle={handleOnToggle}
@@ -536,11 +576,23 @@ const Training: React.FC<ITrainingProps> = ({
             <CustomBtn
               text="Select Optimal Strategy"
               btnStyle="outline-primary"
-              xtraStyles="!max-w-[11.625rem] !h-[1.9375rem] w-full !text-xs"
+              xtraStyles="!max-w-[11.625rem] !h-[1.9375rem] w-full !text-xs !mt-5 lg:!mt-0"
             />
           </>
         )}
       </div>
+
+      {/* Only show chat when on step 1 and 2 */}
+      {currentStep == 1 || currentStep == 2 ? (
+          <GraphChart
+            data={data}
+            ref={parentRef}
+            className="block lg:hidden"
+            isLoading={isLoading}
+            startTimeUnix={startTimeUnix}
+            endTimeUnix={endTimeUnix}
+          />
+        ) : null}
 
       {currentStep == 1 || currentStep == 2 ? (
         <>

@@ -1,5 +1,5 @@
-import CustomBtn from '@components/ui/CustomBtn';
 import { IStatsTableData } from '../hooks/useProfile';
+import CustomBtn from '@components/ui/CustomBtn';
 import MiniLineChart from './MiniLineChart';
 import CustomText from './CustomText';
 
@@ -51,17 +51,15 @@ const StatsTable: React.FC<IStatsTableProps> = ({
                 text={stat.label}
                 hasQuestionMark={hasQuestionMark}
                 toolTipText={stat.toolTipText}
+                isEmpty={isEmpty}
               />
             </div>
 
-            <div
-              id="COL 2"
-              className="flex justify-between items-center"
-            >
+            <div id="COL 2" className="flex justify-between items-center">
               <div>
                 {/* Chart */}
                 {isEmpty && !stat.progressValue ? (
-                  <div className="w-[6.25rem] h-[2px] bg-states" />
+                  <div className="w-[6.25rem] h-[2px] bg-yellow-200" />
                 ) : (
                   stat.chartData && (
                     <div className="w-[5.7rem] h-[1.4375rem]">
@@ -74,11 +72,14 @@ const StatsTable: React.FC<IStatsTableProps> = ({
                 )}
                 {/* Progress Bar */}
                 {stat.progressValue && (
-                  <div className="w-[5.7rem] h-[0.479375rem] bg-blue-100 rounded-[34px]">
+                  <div
+                    className="w-[5.7rem] h-[0.479375rem] rounded-[34px]"
+                    style={{ background: stat.progressValueColor ? stat.progressValueColor[1] : '#e6f4fe' }}    
+                  >
                     {!isEmpty && (
                       <span
-                        style={{ width: `${stat.progressValue}%` }}
-                        className="block h-full bg-blue-200 rounded-[34px]"
+                        style={{ width: `${stat.progressValue}%`, background: stat.progressValueColor ? stat.progressValueColor[0] : '#60b3d7' }}
+                        className="block h-full rounded-[34px]"
                       />
                     )}
                   </div>

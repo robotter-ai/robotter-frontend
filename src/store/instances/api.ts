@@ -14,7 +14,7 @@ const instanceApi = robotterApi.injectEndpoints({
       query: (data) => {
         console.log('createInstance request body:', data);
         return {
-          url: '/instances',
+          url: '/api/v1/instances',
           method: 'POST',
           data,
         };
@@ -25,7 +25,7 @@ const instanceApi = robotterApi.injectEndpoints({
     getInstance: builder.query<string, { instance_id: string }>({
       query: ({ instance_id }) => ({
         method: 'GET',
-        url: `/instances/${instance_id}/wallet`,
+        url: `/api/v1/instances/${instance_id}/wallet`,
       }),
       providesTags: ['Instance'],
     }),
@@ -39,7 +39,7 @@ const instanceApi = robotterApi.injectEndpoints({
       }
     >({
       query: ({ instanceId, ...data }) => ({
-        url: `/instances/${instanceId}/start`,
+        url: `/api/v1/instances/${instanceId}/start`,
         method: 'POST',
         body: data,
       }),
@@ -49,7 +49,7 @@ const instanceApi = robotterApi.injectEndpoints({
     stopInstance: builder.mutation<string, { instance_id: string }>({
       query: ({ instance_id }) => ({
         method: 'POST',
-        url: `/instances/${instance_id}/stop`,
+        url: `/api/v1/instances/${instance_id}/stop`,
       }),
       invalidatesTags: ['StopInstance'],
     }),

@@ -5,7 +5,7 @@ const transactionsEndpoints = transactionsApi.injectEndpoints({
   endpoints: (builder) => ({
     getUserUsdcBalance: builder.query<{ balance: number }, { user: string }>({
       query: (params) => ({
-        url: '/getUserUsdcBalance',
+        url: '/api/v1/getUserUsdcBalance',
         method: 'GET',
         params,
       }),
@@ -15,7 +15,7 @@ const transactionsEndpoints = transactionsApi.injectEndpoints({
       { userAddress: string }
     >({
       query: (params) => ({
-        url: '/getBotData',
+        url: '/api/v1/getBotData',
         method: 'GET',
         params,
       }),

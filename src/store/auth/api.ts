@@ -15,7 +15,7 @@ const authApi = robotterApi.injectEndpoints({
     >({
       query: ({ address }) => ({
         method: 'POST',
-        url: `/authorization/challenge?address=${address}&chain=${CHAIN}`,
+        url: `/api/v1/authorization/challenge?address=${address}&chain=${CHAIN}`,
       }),
     }),
 
@@ -30,7 +30,7 @@ const authApi = robotterApi.injectEndpoints({
     >({
       query: ({ address, signature }) => ({
         method: 'POST',
-        url: `/authorization/solve?address=${address}&chain=${CHAIN}&signature=${signature}`,
+        url: `/api/v1/authorization/solve?address=${address}&chain=${CHAIN}&signature=${signature}`,
       }),
     }),
 
@@ -45,7 +45,7 @@ const authApi = robotterApi.injectEndpoints({
     >({
       query: ({ token }) => ({
         method: 'POST',
-        url: `/authorization/refresh?token=${token}`,
+        url: `/api/v1/authorization/refresh?token=${token}`,
       }),
     }),
   }),
